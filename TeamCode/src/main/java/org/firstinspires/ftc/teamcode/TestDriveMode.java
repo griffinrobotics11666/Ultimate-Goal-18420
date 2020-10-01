@@ -32,16 +32,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
 
@@ -61,77 +53,30 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @TeleOp(name="Test Drive Mode", group="Iterative Opmode")
 //@Disabled
-public class TestDriveMode extends OpMode
-{
+public class TestDriveMode extends OpMode {
+    HardwareRobot robot = new HardwareRobot();
 
     private ElapsedTime runtime = new ElapsedTime();
 
-    //define motor variables
-    private DcMotor rearLeftDrive = null;
-    private DcMotor rearRightDrive = null;
-    private DcMotor frontRightDrive = null;
-    private DcMotor frontLeftDrive = null;
-    private DcMotor slideMotor = null;
-
-    //define servos
-    Servo rightArmServo;
-    Servo leftArmServo;
-
-    ColorSensor colorSensor;    //declare colorSensor
-
-
-    static final double INCREMENT   = 0.003;// amount to increase servo
-    static final double DEBUG_INCREMENT = 0.0005; //amt to increase servo in debug (slower)
+    boolean debug = false;
 
     //SETS MAX AND MIN POSITIONS FOR SERVOS
-    static final double RIGHT_MAX_POS     =  0.67;
-    static final double RIGHT_MIN_POS     =  0.17;
-    static final double LEFT_MIN_POS     =  0.34;
-    static final double LEFT_MAX_POS     =  0.84;
+    private static final double RIGHT_MAX_POS     =  0.67;
+    private static final double RIGHT_MIN_POS     =  0.17;
+    private static final double LEFT_MIN_POS     =  0.34;
+    private static final double LEFT_MAX_POS     =  0.84;
 
-    double  rightServoPosition = 0.5; // Start at halfway position
-    double  leftServoPosition = 0.5; // Start at halfway position
+    private static final double INCREMENT   = 0.003;// amount to increase servo
+    private static final double DEBUG_INCREMENT = 0.0005; //amt to increase servo in debug (slower)
 
-    boolean debug = false;
+    private double  rightServoPosition = 0.5; // Start at halfway position
+    private double  leftServoPosition = 0.5; // Start at halfway position
 
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
-
-        //Init drive motors
-        rearLeftDrive  = hardwareMap.get(DcMotor.class, "rear_left_drive"); //Control Hub Port 2
-        rearRightDrive = hardwareMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
-        frontLeftDrive  = hardwareMap.get(DcMotor.class, "front_left_drive");   //Control Hub Port 3
-        frontRightDrive = hardwareMap.get(DcMotor.class, "front_right_drive");  //Control Hub Port 0
-
-        //init slide motor
-        slideMotor = hardwareMap.get(DcMotor.class, "slide_motor"); //Expansion Hub Port 0
-
-        //sets motors to run w/o encoders
-        rearLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);    //will be set to run w/ encoder later on
-
-        //initialize hardware variables for servos
-        rightArmServo = hardwareMap.get(Servo.class, "right_arm_servo");    //Control Hub Port 0
-        leftArmServo = hardwareMap.get(Servo.class, "left_arm_servo");  //Control Hub Port 0
-
-        //sets init direction for drive motors
-        rearLeftDrive.setDirection(DcMotor.Direction.FORWARD);
-        rearRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
-
-        //sets init position for servos
-        rightArmServo.setPosition(rightServoPosition);
-        leftArmServo.setPosition(leftServoPosition);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -172,8 +117,8 @@ public class TestDriveMode extends OpMode
                     rightServoPosition = RIGHT_MAX_POS;
                     leftServoPosition = LEFT_MIN_POS;
                 }
-                rightArmServo.setPosition(rightServoPosition);
-                leftArmServo.setPosition(leftServoPosition);
+                robot.rightArmServo.setPosition(rightServoPosition);
+                robot.leftArmServo.setPosition(leftServoPosition);
             }
 
             if (gamepad1.dpad_left) {   //closes the servo arm
@@ -183,8 +128,8 @@ public class TestDriveMode extends OpMode
                     rightServoPosition = RIGHT_MIN_POS;
                     leftServoPosition = LEFT_MAX_POS;
                 }
-                rightArmServo.setPosition(rightServoPosition);
-                leftArmServo.setPosition(leftServoPosition);
+                robot.rightArmServo.setPosition(rightServoPosition);
+                robot.leftArmServo.setPosition(leftServoPosition);
             }
 
             if(gamepad1.dpad_up) {  //will run the debug statement until false
@@ -205,10 +150,10 @@ public class TestDriveMode extends OpMode
             frontRightPower = Range.clip(drive - strafe - turn, -1, 1) ;
 
             // Send calculated power to rear wheels
-            rearLeftDrive.setPower(rearLeftPower);
-            rearRightDrive.setPower(rearRightPower);
-            frontLeftDrive.setPower(frontLeftPower);
-            frontRightDrive.setPower(frontRightPower);
+            robot.rearLeftDrive.setPower(rearLeftPower);
+            robot.rearRightDrive.setPower(rearRightPower);
+            robot.frontLeftDrive.setPower(frontLeftPower);
+            robot.frontRightDrive.setPower(frontRightPower);
 
             // Show the elapsed game time.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -224,7 +169,7 @@ public class TestDriveMode extends OpMode
                 if(leftServoPosition >= LEFT_MAX_POS) {
                     leftServoPosition = LEFT_MAX_POS;
                 }
-                leftArmServo.setPosition(leftServoPosition);
+                robot.leftArmServo.setPosition(leftServoPosition);
             }
 
             if(gamepad1.b) {    //decreases left servo slightly
@@ -232,21 +177,21 @@ public class TestDriveMode extends OpMode
                 if(leftServoPosition <= LEFT_MIN_POS) {
                     leftServoPosition = LEFT_MIN_POS;
                 }
-                leftArmServo.setPosition(leftServoPosition);
+                robot.leftArmServo.setPosition(leftServoPosition);
             }
             if(gamepad1.y) {    //increases right servo slightly
                 rightServoPosition += DEBUG_INCREMENT;
                 if(rightServoPosition >= RIGHT_MAX_POS) {
                     rightServoPosition = RIGHT_MAX_POS;
                 }
-                rightArmServo.setPosition(rightServoPosition);
+                robot.rightArmServo.setPosition(rightServoPosition);
             }
             if(gamepad1.x) {    //decreases right servo slightly
                 rightServoPosition -= DEBUG_INCREMENT;
                 if(rightServoPosition <= RIGHT_MIN_POS) {
                     rightServoPosition = RIGHT_MIN_POS;
                 }
-                rightArmServo.setPosition(rightServoPosition);
+                robot.rightArmServo.setPosition(rightServoPosition);
             }
 
 
