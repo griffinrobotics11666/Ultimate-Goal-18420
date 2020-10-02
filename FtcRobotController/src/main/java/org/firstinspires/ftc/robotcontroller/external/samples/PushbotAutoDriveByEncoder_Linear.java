@@ -98,11 +98,11 @@ public class PushbotAutoDriveByEncoder_Linear extends LinearOpMode {
         robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Send telemetry message to indicate successful Encoder reset
-        telemetry.addData("Path0",  "Starting at %7d :%7d",
-                          robot.leftDrive.getCurrentPosition(),
-                          robot.rightDrive.getCurrentPosition());
-        telemetry.update();
 
+        telemetry.addData("Path0",  "Starting at %7d :%7d",
+                robot.leftDrive.getCurrentPosition(),
+                robot.rightDrive.getCurrentPosition());
+        telemetry.update();
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
