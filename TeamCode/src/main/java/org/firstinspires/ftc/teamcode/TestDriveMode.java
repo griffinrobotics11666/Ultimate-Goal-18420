@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 /**
@@ -154,6 +155,12 @@ public class TestDriveMode extends OpMode {
             robot.rearRightDrive.setPower(rearRightPower);
             robot.frontLeftDrive.setPower(frontLeftPower);
             robot.frontRightDrive.setPower(frontRightPower);
+
+            telemetry.addData("color_sensor_red", robot.colorSensor.red());
+            telemetry.addData("color_sensor_green", robot.colorSensor.green());
+            telemetry.addData("color_sensor_blue", robot.colorSensor.blue());
+            telemetry.addData("distance_sensor_cm", robot.distanceSensor.getDistance(DistanceUnit.CM));
+
 
             // Show the elapsed game time.
             telemetry.addData("Status", "Run Time: " + runtime.toString());

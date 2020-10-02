@@ -29,7 +29,9 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -54,6 +56,10 @@ public class HardwareRobot
 
     public double  rightServoPosition = 0.5; // Start at halfway position
     public double  leftServoPosition = 0.5; // Start at halfway position
+
+    //define color & distance sensor
+    public ColorSensor colorSensor;
+    public DistanceSensor distanceSensor;
 
     /* local OpMode members. */
     com.qualcomm.robotcore.hardware.HardwareMap hwMap =  null;
@@ -97,6 +103,10 @@ public class HardwareRobot
         //sets init position for servos
         rightArmServo.setPosition(rightServoPosition);
         leftArmServo.setPosition(leftServoPosition);
+
+        //init hardware variables for color & distance sensors
+        colorSensor = hwMap.get(ColorSensor.class, "color_distance_sensor");
+        distanceSensor = hwMap.get(DistanceSensor.class, "color_distance_sensor");
     }
 }
 
