@@ -53,7 +53,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  */
 
 @TeleOp(name="Test Drive Mode", group="Iterative Opmode")
-//@Disabled
+@Disabled
 public class TestDriveMode extends OpMode {
     HardwareRobot robot = new HardwareRobot();
 

@@ -37,79 +37,114 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-
-/**
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all linear OpModes contain.
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
-
 @TeleOp(name="Basic: Linear OpMode", group="Linear Opmode")
-@Disabled
+//@Disabled
 public class AutonomousTest extends LinearOpMode {
     HardwareRobot ned= new HardwareRobot();
 
+    private ElapsedTime     runtime = new ElapsedTime();
 
-
+    static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // encoder counts per revolution
+    static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
+    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double     DRIVE_SPEED             = 0.6;
+    static final double     TURN_SPEED              = 0.5;
 
     @Override
     public void runOpMode() {
-      ned.init(hardwareMap);
-
-        ned.rearLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        ned.rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        ned.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        ned.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-
-
-        ned.rearLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        ned.rearRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        ned.init(hardwareMap);
 
         telemetry.addData("Path0",  "Starting at %7d :%7d",
                 ned.rearRightDrive.getCurrentPosition(),
                 ned.rearLeftDrive.getCurrentPosition(),
                 ned.frontLeftDrive.getCurrentPosition(),
-                ned.frontRightDrive.getCurrentPosition(),
+                ned.frontRightDrive.getCurrentPosition());
 
         telemetry.update();
 
-
-
-
-
-        telemetry.addData("Status", "Initialized");
+        telemetry.addData("Status", "Ready");
         telemetry.update();
-
-
 
         // Wait for the game to start (driver presses PLAY)
-
-
         waitForStart();
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
+        encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 48 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
 
 
-        // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
+        telemetry.addData("Path", "Complete");
+        telemetry.update();
+    }
 
+    /*
+     *  Method to perform a relative move, based on encoder counts.
+     *  Encoders are not reset as the move is based on the current position.
+     *  Move will stop if any of three conditions occur:
+     *  1) Move gets to the desired position
+     *  2) Move runs out of time
+     *  3) Driver stops the opmode running.
+     */
+    public void encoderDrive(double speed, double leftInches, double rightInches, double timeoutS) {
+        int newFrontLeftTarget;
+        int newFrontRightTarget;
+        int newRearLeftTarget;
+        int newRearRightTarget;
 
-            sleep(1000);     // pause for servos to move
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
 
-            telemetry.addData("Path", "Complete");
-            telemetry.update();
-        }
+            // calculate target positions
+            newFrontLeftTarget = ned.frontLeftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newFrontRightTarget = ned.frontRightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newRearLeftTarget = ned.rearLeftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRearRightTarget = ned.rearRightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+
+            //set target positions for motors
+            ned.frontLeftDrive.setTargetPosition(newFrontLeftTarget);
+            ned.frontRightDrive.setTargetPosition(newFrontRightTarget);
+            ned.rearLeftDrive.setTargetPosition(newRearLeftTarget);
+            ned.rearRightDrive.setTargetPosition(newRearRightTarget);
+
+            // Turn On RUN_TO_POSITION
+            ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            ned.rearLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            ned.rearRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            ned.frontLeftDrive.setPower(Math.abs(speed));
+            ned.frontRightDrive.setPower(Math.abs(speed));
+            ned.rearLeftDrive.setPower(Math.abs(speed));
+            ned.rearRightDrive.setPower(Math.abs(speed));
+
+            //if one of these is false, the loop will exit and will continue to set power for all wheels to 0
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && ned.frontLeftDrive.isBusy() && ned.frontLeftDrive.isBusy()
+                    && ned.rearLeftDrive.isBusy() && ned.rearRightDrive.isBusy()) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d :%7d", newFrontLeftTarget,  newFrontRightTarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d", ned.frontLeftDrive.getCurrentPosition(), ned.frontRightDrive.getCurrentPosition());
+                telemetry.update(); //TODO this only outputs front drive wheels' position
+            }
+
+            // Stop all motion;
+            ned.frontLeftDrive.setPower(0);
+            ned.frontRightDrive.setPower(0);
+            ned.rearLeftDrive.setPower(0);
+            ned.rearRightDrive.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            ned.rearLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            ned.rearRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            //  sleep(250);   // optional pause after each move
         }
     }
 }

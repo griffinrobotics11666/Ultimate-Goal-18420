@@ -81,32 +81,37 @@ public class HardwareRobot
         frontLeftDrive  = hwMap.get(DcMotor.class, "front_left_drive");   //Control Hub Port 3
         frontRightDrive = hwMap.get(DcMotor.class, "front_right_drive");  //Control Hub Port 0
         //init slide motor
-        slideMotor = hwMap.get(DcMotor.class, "slide_motor"); //Expansion Hub Port 0
+        //slideMotor = hwMap.get(DcMotor.class, "slide_motor"); //Expansion Hub Port 0
 
         //sets init direction for drive motors
-        rearLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rearLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         rearRightDrive.setDirection(DcMotor.Direction.FORWARD);
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
-        //sets motors to run w/o encoders
-        rearLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);    //will be set to run w/ encoder later on
+        //resetting DC motor encoders
+        rearLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //setting DC motors to run with encoders
+        rearLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rearRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //initialize hardware variables for servos
-        rightArmServo = hwMap.get(Servo.class, "right_arm_servo");    //Control Hub Port 0
-        leftArmServo = hwMap.get(Servo.class, "left_arm_servo");  //Control Hub Port 0
+       // rightArmServo = hwMap.get(Servo.class, "right_arm_servo");    //Control Hub Port 0
+       // leftArmServo = hwMap.get(Servo.class, "left_arm_servo");  //Control Hub Port 0
 
         //sets init position for servos
-        rightArmServo.setPosition(rightServoPosition);
-        leftArmServo.setPosition(leftServoPosition);
+        //rightArmServo.setPosition(rightServoPosition);
+        //leftArmServo.setPosition(leftServoPosition);
 
         //init hardware variables for color & distance sensors
-        colorSensor = hwMap.get(ColorSensor.class, "color_distance_sensor");
-        distanceSensor = hwMap.get(DistanceSensor.class, "color_distance_sensor");
+       // colorSensor = hwMap.get(ColorSensor.class, "color_distance_sensor");
+       // distanceSensor = hwMap.get(DistanceSensor.class, "color_distance_sensor");
     }
 }
 
