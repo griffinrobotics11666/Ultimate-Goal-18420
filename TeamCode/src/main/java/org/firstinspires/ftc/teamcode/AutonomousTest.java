@@ -37,11 +37,22 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 @Autonomous(name="Autonomous Test", group="Linear Opmode")
 //@Disabled
 public class AutonomousTest extends LinearOpMode {
     HardwareRobot ned= new HardwareRobot();
+
+    Orientation angleExpansion;
+    Orientation angleControl;
 
     private ElapsedTime     runtime = new ElapsedTime();
 
@@ -64,16 +75,22 @@ public class AutonomousTest extends LinearOpMode {
 
         telemetry.update();
 
+
+
         //telemetry.addData("Status", "Ready");
         //telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
+        ned.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        ned.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+
+
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         //timeout is a failsafe to stop all motors if it takes too long
-        encoderDrive(DRIVE_SPEED,  72,  72, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED,  200,  200, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
         encoderDrive(TURN_SPEED,   12, -12, 10.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
         encoderDrive(DRIVE_SPEED, -24, -24, 10.0);  // S3: Reverse 24 Inches with 4 Sec timeout
 
@@ -165,6 +182,7 @@ public class AutonomousTest extends LinearOpMode {
                 ned.rearRightDrive.setPower(currentSpeed);
                 telemetry.addData("Current Speed", currentSpeed);
                 // Display it for the driver.
+                telemetry.addData("Angle", readAngle());
                 telemetry.addData("Path1",  "Running to %7d :%7d", newFrontLeftTarget,  newFrontRightTarget);
                 telemetry.addData("Path2",  "Running at %7d :%7d", ned.frontLeftDrive.getCurrentPosition(), ned.frontRightDrive.getCurrentPosition());
                 telemetry.update(); //TODO this only outputs front drive wheels' position
@@ -185,4 +203,11 @@ public class AutonomousTest extends LinearOpMode {
             sleep(250);   // optional pause after each move
         }
     }
+
+    public String readAngle() {
+        angleControl = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angleExpansion = ned.imuExpansion.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return "Expansion: " + String.valueOf(angleExpansion.firstAngle) + "\nAngle: Control: " + String.valueOf(angleControl.firstAngle);
+    }
+
 }
