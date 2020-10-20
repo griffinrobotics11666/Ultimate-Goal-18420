@@ -32,8 +32,12 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -57,6 +61,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class TestDriveMode extends OpMode {
     HardwareRobot robot = new HardwareRobot();
 
+
     private ElapsedTime runtime = new ElapsedTime();
 
     boolean debug = false;
@@ -78,7 +83,11 @@ public class TestDriveMode extends OpMode {
      */
     @Override
     public void init() {
-
+        //resetting DC motor encoders
+        robot.rearLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
     }

@@ -107,6 +107,7 @@ public class AutonomousTest extends LinearOpMode {
      *  2) Move runs out of time
      *  3) Driver stops the opmode running.
      */
+
     public void encoderDrive(double speed, double leftInches, double rightInches, double timeoutS) {
         int newFrontLeftTarget;
         int newFrontRightTarget;
@@ -167,7 +168,7 @@ public class AutonomousTest extends LinearOpMode {
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && ned.frontLeftDrive.isBusy() && ned.frontLeftDrive.isBusy()
                     && ned.rearLeftDrive.isBusy() && ned.rearRightDrive.isBusy()) {
 
-                if (currentSpeed < speed && !(newFrontLeftTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * newFrontLeftTarget)) {
+                if (currentSpeed < speed && !(newFrontLeftTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * newFrontLeftTarget)) { //TODO create ramp up & ramp down methods
                     currentSpeed += 0.005;
 
                 }
@@ -185,8 +186,9 @@ public class AutonomousTest extends LinearOpMode {
                 telemetry.addData("Angle", readAngle());
                 telemetry.addData("Path1",  "Running to %7d :%7d", newFrontLeftTarget,  newFrontRightTarget);
                 telemetry.addData("Path2",  "Running at %7d :%7d", ned.frontLeftDrive.getCurrentPosition(), ned.frontRightDrive.getCurrentPosition());
-                telemetry.update(); //TODO this only outputs front drive wheels' position
+                telemetry.update();
             }
+
 
             // Stop all motion;
             ned.frontLeftDrive.setPower(0);
