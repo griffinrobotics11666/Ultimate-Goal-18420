@@ -168,7 +168,7 @@ public class AutonomousTest extends LinearOpMode {
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && ned.frontLeftDrive.isBusy() && ned.frontLeftDrive.isBusy()
                     && ned.rearLeftDrive.isBusy() && ned.rearRightDrive.isBusy()) {
 
-                if (currentSpeed < speed && !(newFrontLeftTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * newFrontLeftTarget)) { //TODO create ramp up & ramp down methods
+                if (currentSpeed < speed && !(newFrontLeftTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * newFrontLeftTarget)) { //TODO create ramp up & ramp down methods edit: this done?
                     currentSpeed += 0.005;
 
                 }
@@ -204,6 +204,70 @@ public class AutonomousTest extends LinearOpMode {
 
             sleep(250);   // optional pause after each move
         }
+    }
+
+    public void turnRight(){    //turns 90 degrees to the right using gyro
+        ned.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ned.frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ned.rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ned.rearRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ned.rearLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ned.rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        double originalAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        double currentAngle = originalAngle;    //used later in the while loop
+        double targetAngle = originalAngle - 90;
+        if(targetAngle < 0){    //adjusts for -180 -> 180
+            targetAngle = 360 - Math.abs(targetAngle);
+        }
+
+        while(targetAngle != currentAngle){
+            ned.rearLeftDrive.setPower(-0.8);   //TODO ramp up & ramp down
+            ned.rearRightDrive.setPower(0.8);
+            ned.frontLeftDrive.setPower(-0.8);
+            ned.frontRightDrive.setPower(0.8);
+            currentAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        }
+
+        // Stop all motion after turn
+        ned.frontLeftDrive.setPower(0);
+        ned.frontRightDrive.setPower(0);
+        ned.rearLeftDrive.setPower(0);
+        ned.rearRightDrive.setPower(0);
+    }
+
+    public void turnLeft(){    //turns 90 degrees to the left using gyro
+        ned.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ned.frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ned.rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ned.rearRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ned.rearLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ned.rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        double originalAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        double currentAngle = originalAngle;    //used later in the while loop TODO maybe we can use originalAngle & just update itf
+        double targetAngle = originalAngle + 90;
+        if(targetAngle > 180){    //adjusts for -180 -> 180
+            targetAngle = 360 - targetAngle;
+        }
+
+        while(targetAngle != currentAngle){
+            ned.rearLeftDrive.setPower(0.8);   //TODO ramp up & ramp down
+            ned.rearRightDrive.setPower(-0.8);
+            ned.frontLeftDrive.setPower(0.8);
+            ned.frontRightDrive.setPower(-0.8);
+            currentAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        }
+
+        // Stop all motion after turn
+        ned.frontLeftDrive.setPower(0);
+        ned.frontRightDrive.setPower(0);
+        ned.rearLeftDrive.setPower(0);
+        ned.rearRightDrive.setPower(0);
     }
 
     public String readAngle() {
