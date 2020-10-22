@@ -90,10 +90,14 @@ public class AutonomousTest extends LinearOpMode {
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         //timeout is a failsafe to stop all motors if it takes too long
-        encoderDrive(DRIVE_SPEED,  200,  200, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED,  24,  24, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
         turnLeftDegrees(90);
+        sleep(500);
+        turnRightDegrees(90);
         encoderDrive(DRIVE_SPEED, -24, -24, 10.0);  // S3: Reverse 24 Inches with 4 Sec timeout
         turnRightDegrees(90);
+        sleep(500);
+        turnLeftDegrees(90);
 
 
         telemetry.addData("Path", "Complete");
@@ -221,16 +225,20 @@ public class AutonomousTest extends LinearOpMode {
         double currentAngle = originalAngle;    //used later in the while loop
         double targetAngle = originalAngle + degree;
         if(targetAngle > 180){    //adjusts for -180 -> 180
-            targetAngle = -1 * (360 - Math.abs(targetAngle));
+            targetAngle = Math.abs(targetAngle) - 360;
         }
 
-        ned.rearLeftDrive.setPower(-0.3);   //TODO ramp up & ramp down
-        ned.rearRightDrive.setPower(0.3);
-        ned.frontLeftDrive.setPower(-0.3);
-        ned.frontRightDrive.setPower(0.3);
+        ned.rearLeftDrive.setPower(-0.5);   //TODO ramp up & ramp down
+        ned.rearRightDrive.setPower(0.5);
+        ned.frontLeftDrive.setPower(-0.5);
+        ned.frontRightDrive.setPower(0.5);
 
-        while(targetAngle != currentAngle){
+        while(!(currentAngle >= targetAngle - 2 && currentAngle <= targetAngle + 2)){
             currentAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            telemetry.addData("Target Angle: ", targetAngle);
+            telemetry.addData("Current Angle: ", currentAngle);
+            telemetry.addData("Angle", readAngle());
+            telemetry.update();
         }
 
         // Stop all motion after turn
@@ -256,13 +264,17 @@ public class AutonomousTest extends LinearOpMode {
         if(targetAngle < -180){    //adjusts for -180 -> 180
             targetAngle = 360 - Math.abs(targetAngle);
         }
-        ned.rearLeftDrive.setPower(-0.3);   //TODO ramp up & ramp down
-        ned.rearRightDrive.setPower(0.3);
-        ned.frontLeftDrive.setPower(-0.3);
-        ned.frontRightDrive.setPower(0.3);
+        ned.rearLeftDrive.setPower(0.5);   //TODO ramp up & ramp down
+        ned.rearRightDrive.setPower(-0.5);
+        ned.frontLeftDrive.setPower(0.5);
+        ned.frontRightDrive.setPower(-0.5);
 
-        while(targetAngle != currentAngle){
+        while(!(currentAngle >= targetAngle - 2 && currentAngle <= targetAngle + 2)){
             currentAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            telemetry.addData("Target Angle: ", targetAngle);
+            telemetry.addData("Current Angle: ", currentAngle);
+            telemetry.addData("Angle", readAngle());
+            telemetry.update();
         }
 
         // Stop all motion after turn
