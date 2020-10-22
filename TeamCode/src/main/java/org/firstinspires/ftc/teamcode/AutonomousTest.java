@@ -90,11 +90,11 @@ public class AutonomousTest extends LinearOpMode {
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         //timeout is a failsafe to stop all motors if it takes too long
-        encoderDrive(DRIVE_SPEED,  24,  24, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED,  24, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
         turnLeftDegrees(90);
         sleep(500);
         turnRightDegrees(90);
-        encoderDrive(DRIVE_SPEED, -24, -24, 10.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED, -24, 10.0);  // S3: Reverse 24 Inches with 4 Sec timeout
         turnRightDegrees(90);
         sleep(500);
         turnLeftDegrees(90);
@@ -113,11 +113,8 @@ public class AutonomousTest extends LinearOpMode {
      *  3) Driver stops the opmode running.
      */
 
-    public void encoderDrive(double speed, double leftInches, double rightInches, double timeoutS) {
-        int newFrontLeftTarget;
-        int newFrontRightTarget;
-        int newRearLeftTarget;
-        int newRearRightTarget;
+    public void encoderDrive(double speed, double inches, double timeoutS) {
+        int encoderTarget;
 
 
 
@@ -143,16 +140,13 @@ public class AutonomousTest extends LinearOpMode {
             ned.rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // calculate target positions
-            newFrontLeftTarget = ned.frontLeftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newFrontRightTarget = ned.frontRightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            newRearLeftTarget = ned.rearLeftDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newRearRightTarget = ned.rearRightDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            encoderTarget = ned.frontLeftDrive.getCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
 
             //set target positions for motors
-            ned.frontLeftDrive.setTargetPosition(newFrontLeftTarget);
-            ned.frontRightDrive.setTargetPosition(newFrontRightTarget);
-            ned.rearLeftDrive.setTargetPosition(newRearLeftTarget);
-            ned.rearRightDrive.setTargetPosition(newRearRightTarget);
+            ned.frontLeftDrive.setTargetPosition(encoderTarget);
+            ned.frontRightDrive.setTargetPosition(encoderTarget);
+            ned.rearLeftDrive.setTargetPosition(encoderTarget);
+            ned.rearRightDrive.setTargetPosition(encoderTarget);
 
             // Turn On RUN_TO_POSITION
             ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -173,12 +167,12 @@ public class AutonomousTest extends LinearOpMode {
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && ned.frontLeftDrive.isBusy() && ned.frontLeftDrive.isBusy()
                     && ned.rearLeftDrive.isBusy() && ned.rearRightDrive.isBusy()) {
 
-                if (currentSpeed < speed && !(newFrontLeftTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * newFrontLeftTarget)) { //TODO create ramp up & ramp down methods edit: this done?
+                if (currentSpeed < speed && !(encoderTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * encoderTarget)) { //TODO create ramp up & ramp down methods edit: this done?
                     currentSpeed += 0.005;
 
                 }
 
-                if (newFrontLeftTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * newFrontLeftTarget) {
+                if (encoderTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * encoderTarget) {
                     //currentSpeed = speed * (newFrontLeftTarget - ned.frontLeftDrive.getCurrentPosition()) / (newFrontLeftTarget);
                     currentSpeed -= 0.005;
                 }
@@ -188,9 +182,8 @@ public class AutonomousTest extends LinearOpMode {
                 ned.rearRightDrive.setPower(currentSpeed);
                 telemetry.addData("Current Speed", currentSpeed);
                 // Display it for the driver.
-                telemetry.addData("Angle", readAngle());
-                telemetry.addData("Path1",  "Running to %7d :%7d", newFrontLeftTarget,  newFrontRightTarget);
-                telemetry.addData("Path2",  "Running at %7d :%7d", ned.frontLeftDrive.getCurrentPosition(), ned.frontRightDrive.getCurrentPosition());
+                telemetry.addData("Path1",  "Running to %7d", encoderTarget);
+                telemetry.addData("Path2",  "Running at %7d", ned.frontLeftDrive.getCurrentPosition());
                 telemetry.update();
             }
 
