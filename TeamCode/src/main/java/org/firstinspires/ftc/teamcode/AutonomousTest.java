@@ -206,7 +206,7 @@ public class AutonomousTest extends LinearOpMode {
         }
     }
 
-    public void turnRight(){    //turns 90 degrees to the right using gyro
+    public void turnLeftDegrees(double degree){
         ned.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ned.frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ned.rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -218,16 +218,16 @@ public class AutonomousTest extends LinearOpMode {
 
         double originalAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         double currentAngle = originalAngle;    //used later in the while loop
-        double targetAngle = originalAngle - 90;
-        if(targetAngle < 0){    //adjusts for -180 -> 180
+        double targetAngle = originalAngle + degree;
+        if(targetAngle > 180){    //adjusts for -180 -> 180
             targetAngle = 360 - Math.abs(targetAngle);
         }
 
         while(targetAngle != currentAngle){
-            ned.rearLeftDrive.setPower(-0.8);   //TODO ramp up & ramp down
-            ned.rearRightDrive.setPower(0.8);
-            ned.frontLeftDrive.setPower(-0.8);
-            ned.frontRightDrive.setPower(0.8);
+            ned.rearLeftDrive.setPower(-0.3);   //TODO ramp up & ramp down
+            ned.rearRightDrive.setPower(0.3);
+            ned.frontLeftDrive.setPower(-0.3);
+            ned.frontRightDrive.setPower(0.3);
             currentAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         }
 
@@ -238,7 +238,7 @@ public class AutonomousTest extends LinearOpMode {
         ned.rearRightDrive.setPower(0);
     }
 
-    public void turnLeft(){    //turns 90 degrees to the left using gyro
+    public void turnRightDegrees(double degree){
         ned.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ned.frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ned.rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -249,17 +249,17 @@ public class AutonomousTest extends LinearOpMode {
         ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         double originalAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-        double currentAngle = originalAngle;    //used later in the while loop TODO maybe we can use originalAngle & just update itf
-        double targetAngle = originalAngle + 90;
-        if(targetAngle > 180){    //adjusts for -180 -> 180
-            targetAngle = 360 - targetAngle;
+        double currentAngle = originalAngle;    //used later in the while loop
+        double targetAngle = originalAngle - degree;
+        if(targetAngle < -180){    //adjusts for -180 -> 180
+            targetAngle = 360 - Math.abs(targetAngle);
         }
 
         while(targetAngle != currentAngle){
-            ned.rearLeftDrive.setPower(0.8);   //TODO ramp up & ramp down
-            ned.rearRightDrive.setPower(-0.8);
-            ned.frontLeftDrive.setPower(0.8);
-            ned.frontRightDrive.setPower(-0.8);
+            ned.rearLeftDrive.setPower(-0.3);   //TODO ramp up & ramp down
+            ned.rearRightDrive.setPower(0.3);
+            ned.frontLeftDrive.setPower(-0.3);
+            ned.frontRightDrive.setPower(0.3);
             currentAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         }
 
