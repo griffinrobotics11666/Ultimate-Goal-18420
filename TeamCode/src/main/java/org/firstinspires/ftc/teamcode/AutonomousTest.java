@@ -223,11 +223,12 @@ public class AutonomousTest extends LinearOpMode {
             targetAngle = 360 - Math.abs(targetAngle);
         }
 
+        ned.rearLeftDrive.setPower(-0.3);   //TODO ramp up & ramp down
+        ned.rearRightDrive.setPower(0.3);
+        ned.frontLeftDrive.setPower(-0.3);
+        ned.frontRightDrive.setPower(0.3);
+
         while(targetAngle != currentAngle){
-            ned.rearLeftDrive.setPower(-0.3);   //TODO ramp up & ramp down
-            ned.rearRightDrive.setPower(0.3);
-            ned.frontLeftDrive.setPower(-0.3);
-            ned.frontRightDrive.setPower(0.3);
             currentAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         }
 
@@ -254,12 +255,12 @@ public class AutonomousTest extends LinearOpMode {
         if(targetAngle < -180){    //adjusts for -180 -> 180
             targetAngle = 360 - Math.abs(targetAngle);
         }
+        ned.rearLeftDrive.setPower(-0.3);   //TODO ramp up & ramp down
+        ned.rearRightDrive.setPower(0.3);
+        ned.frontLeftDrive.setPower(-0.3);
+        ned.frontRightDrive.setPower(0.3);
 
         while(targetAngle != currentAngle){
-            ned.rearLeftDrive.setPower(-0.3);   //TODO ramp up & ramp down
-            ned.rearRightDrive.setPower(0.3);
-            ned.frontLeftDrive.setPower(-0.3);
-            ned.frontRightDrive.setPower(0.3);
             currentAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         }
 
