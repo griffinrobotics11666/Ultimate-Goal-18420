@@ -91,8 +91,9 @@ public class AutonomousTest extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         //timeout is a failsafe to stop all motors if it takes too long
         encoderDrive(DRIVE_SPEED,  200,  200, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   12, -12, 10.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        turnLeftDegrees(90);
         encoderDrive(DRIVE_SPEED, -24, -24, 10.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        turnRightDegrees(90);
 
 
         telemetry.addData("Path", "Complete");
