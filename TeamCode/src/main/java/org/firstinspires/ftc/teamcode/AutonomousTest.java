@@ -220,7 +220,7 @@ public class AutonomousTest extends LinearOpMode {
         double currentAngle = originalAngle;    //used later in the while loop
         double targetAngle = originalAngle + degree;
         if(targetAngle > 180){    //adjusts for -180 -> 180
-            targetAngle = 360 - Math.abs(targetAngle);
+            targetAngle = -1 * (360 - Math.abs(targetAngle));
         }
 
         ned.rearLeftDrive.setPower(-0.3);   //TODO ramp up & ramp down
