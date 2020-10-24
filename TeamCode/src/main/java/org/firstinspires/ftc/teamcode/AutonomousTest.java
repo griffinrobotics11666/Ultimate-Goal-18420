@@ -54,14 +54,6 @@ public class AutonomousTest extends LinearOpMode {
     Orientation angleExpansion;
     Orientation angleControl;
 
-    static final double INCREMENT = 0.01;     // amount to ramp motor each CYCLE_MS cycle
-    static final int CYCLE_MS = 50;     // period of each cycle
-    static final double MAX_FWD = 1.0;     // Maximum FWD power applied to motor
-    static final double MAX_REV = -1.0;     // Maximum REV power applied to motor
-
-    DcMotor motor;
-    double power = 0;
-    boolean rampUp = true;
 
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -220,29 +212,31 @@ public class AutonomousTest extends LinearOpMode {
 
     public void turn(double turnAngle, double speed) {
         double currentAngle = readDoubleAngle();
-        double lastAngle = 0;
-        double deltaAngle = currentAngle - lastAngle;
+        double lastAngle = currentAngle;
+        double deltaAngle = 0;
         double totalAngle = 0;
-        totalAngle += deltaAngle;
         if (Math.abs(deltaAngle) >= 180) {
             deltaAngle = currentAngle + lastAngle;
         }
         double increment = .5;
         double power = 0;
-        while (Math.abs(totalAngle - turnAngle) > .1) {
+        while (opModeIsActive() && Math.abs(totalAngle - turnAngle) > .1) {
+            deltaAngle = currentAngle - lastAngle;
+            totalAngle += deltaAngle;
+            currentAngle = readDoubleAngle();
+            power += increment;
             if (power > speed){
                 power = speed;
             }
             else if (power < (-1)){
                 power = -1;
             }
-            power += increment;
             ned.frontLeftDrive.setPower(power);
             ned.frontRightDrive.setPower(power);
             ned.rearLeftDrive.setPower(power);
             ned.rearRightDrive.setPower(power);
             if(Math.abs(totalAngle) > Math.abs(turnAngle)){
-                increment = increment * (-1/2);
+                increment = increment * (-0.5);
             }
         }
             ned.frontLeftDrive.setPower (0);
@@ -261,7 +255,6 @@ public class AutonomousTest extends LinearOpMode {
 
     public double readDoubleAngle() {
         angleControl = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        angleExpansion = ned.imuExpansion.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        return Double.parseDouble(String.valueOf(angleControl.firstAngle));
+        return angleControl.firstAngle;
     }
 }
