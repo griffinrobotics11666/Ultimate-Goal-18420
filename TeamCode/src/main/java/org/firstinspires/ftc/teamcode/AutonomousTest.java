@@ -49,32 +49,43 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 @Autonomous(name="Autonomous Test", group="Linear Opmode")
 //@Disabled
 public class AutonomousTest extends LinearOpMode {
-    HardwareRobot ned= new HardwareRobot();
+    HardwareRobot ned = new HardwareRobot();
 
     Orientation angleExpansion;
     Orientation angleControl;
 
-    private ElapsedTime     runtime = new ElapsedTime();
+    static final double INCREMENT = 0.01;     // amount to ramp motor each CYCLE_MS cycle
+    static final int CYCLE_MS = 50;     // period of each cycle
+    static final double MAX_FWD = 1.0;     // Maximum FWD power applied to motor
+    static final double MAX_REV = -1.0;     // Maximum REV power applied to motor
 
-    static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;    // encoder counts per revolution
-    static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
-    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
-    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.6;
-    static final double     TURN_SPEED              = 0.5;
+    DcMotor motor;
+    double power = 0;
+    boolean rampUp = true;
+
+
+    private ElapsedTime runtime = new ElapsedTime();
+
+    static final double COUNTS_PER_MOTOR_REV = 537.6;    // encoder counts per revolution
+    static final double DRIVE_GEAR_REDUCTION = 2.0;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double DRIVE_SPEED = 0.6;
+    static final double TURN_SPEED = 0.5;
+
 
     @Override
     public void runOpMode() {
+
         ned.init(hardwareMap);
 
-        telemetry.addData("Path0",  "Starting at %7d :%7d",
+        telemetry.addData("Path0", "Starting at %7d :%7d",
                 ned.rearRightDrive.getCurrentPosition(),
                 ned.rearLeftDrive.getCurrentPosition(),
                 ned.frontLeftDrive.getCurrentPosition(),
                 ned.frontRightDrive.getCurrentPosition());
 
         telemetry.update();
-
 
 
         //telemetry.addData("Status", "Ready");
@@ -86,23 +97,28 @@ public class AutonomousTest extends LinearOpMode {
         ned.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         ned.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
-
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         //timeout is a failsafe to stop all motors if it takes too long
-        encoderDrive(DRIVE_SPEED,  24, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
-        turnLeftDegrees(90);
+        encoderDrive(DRIVE_SPEED, 24, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
+        turn(-90, .5);
         sleep(500);
-        turnRightDegrees(90);
+        turn(90, .5);
         encoderDrive(DRIVE_SPEED, -24, 10.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-        turnRightDegrees(90);
+        turn(90, .5);
         sleep(500);
-        turnLeftDegrees(90);
+        turn(90, .5);
 
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
+
     }
+
+
+
+
+
 
     /*
      *  Method to perform a relative move, based on encoder counts.
@@ -115,7 +131,6 @@ public class AutonomousTest extends LinearOpMode {
 
     public void encoderDrive(double speed, double inches, double timeoutS) {
         int encoderTarget;
-
 
 
         double currentSpeed = 0.2;
@@ -140,7 +155,7 @@ public class AutonomousTest extends LinearOpMode {
             ned.rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // calculate target positions
-            encoderTarget = ned.frontLeftDrive.getCurrentPosition() + (int)(inches * COUNTS_PER_INCH);
+            encoderTarget = ned.frontLeftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
 
             //set target positions for motors
             ned.frontLeftDrive.setTargetPosition(encoderTarget);
@@ -162,7 +177,6 @@ public class AutonomousTest extends LinearOpMode {
             ned.rearRightDrive.setPower(currentSpeed);
 
 
-
             //if one of these is false, the loop will exit and will continue to set power for all wheels to 0
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && ned.frontLeftDrive.isBusy() && ned.frontLeftDrive.isBusy()
                     && ned.rearLeftDrive.isBusy() && ned.rearRightDrive.isBusy()) {
@@ -182,8 +196,8 @@ public class AutonomousTest extends LinearOpMode {
                 ned.rearRightDrive.setPower(currentSpeed);
                 telemetry.addData("Current Speed", currentSpeed);
                 // Display it for the driver.
-                telemetry.addData("Path1",  "Running to %7d", encoderTarget);
-                telemetry.addData("Path2",  "Running at %7d", ned.frontLeftDrive.getCurrentPosition());
+                telemetry.addData("Path1", "Running to %7d", encoderTarget);
+                telemetry.addData("Path2", "Running at %7d", ned.frontLeftDrive.getCurrentPosition());
                 telemetry.update();
             }
 
@@ -204,78 +218,40 @@ public class AutonomousTest extends LinearOpMode {
         }
     }
 
-    public void turnLeftDegrees(double degree){
-        ned.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ned.frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ned.rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ned.rearRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ned.rearLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ned.rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        double originalAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-        double currentAngle = originalAngle;    //used later in the while loop
-        double targetAngle = originalAngle + degree;
-        if(targetAngle > 180){    //adjusts for -180 -> 180
-            targetAngle = Math.abs(targetAngle) - 360;
+    public void turn(double turnAngle, double speed) {
+        double currentAngle = readDoubleAngle();
+        double lastAngle = 0;
+        double deltaAngle = currentAngle - lastAngle;
+        double totalAngle = 0;
+        totalAngle += deltaAngle;
+        if (Math.abs(deltaAngle) >= 180) {
+            deltaAngle = currentAngle + lastAngle;
         }
-
-        ned.rearLeftDrive.setPower(-0.5);   //TODO ramp up & ramp down
-        ned.rearRightDrive.setPower(0.5);
-        ned.frontLeftDrive.setPower(-0.5);
-        ned.frontRightDrive.setPower(0.5);
-
-        while(!(currentAngle >= targetAngle - 2 && currentAngle <= targetAngle + 2)){
-            currentAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-            telemetry.addData("Target Angle: ", targetAngle);
-            telemetry.addData("Current Angle: ", currentAngle);
-            telemetry.addData("Angle", readAngle());
-            telemetry.update();
+        double increment = .5;
+        double power = 0;
+        while (Math.abs(totalAngle - turnAngle) > .1) {
+            if (power > speed){
+                power = speed;
+            }
+            else if (power < (-1)){
+                power = -1;
+            }
+            power += increment;
+            ned.frontLeftDrive.setPower(power);
+            ned.frontRightDrive.setPower(power);
+            ned.rearLeftDrive.setPower(power);
+            ned.rearRightDrive.setPower(power);
+            if(Math.abs(totalAngle) > Math.abs(turnAngle)){
+                increment = increment * (-1/2);
+            }
         }
+            ned.frontLeftDrive.setPower (0);
+            ned.frontRightDrive.setPower(0);
+            ned.rearLeftDrive.setPower(0);
+            ned.rearRightDrive.setPower(0);
 
-        // Stop all motion after turn
-        ned.frontLeftDrive.setPower(0);
-        ned.frontRightDrive.setPower(0);
-        ned.rearLeftDrive.setPower(0);
-        ned.rearRightDrive.setPower(0);
     }
 
-    public void turnRightDegrees(double degree){
-        ned.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ned.frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ned.rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ned.rearRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ned.rearLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ned.rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        double originalAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-        double currentAngle = originalAngle;    //used later in the while loop
-        double targetAngle = originalAngle - degree;
-        if(targetAngle < -180){    //adjusts for -180 -> 180
-            targetAngle = 360 - Math.abs(targetAngle);
-        }
-        ned.rearLeftDrive.setPower(0.5);   //TODO ramp up & ramp down
-        ned.rearRightDrive.setPower(-0.5);
-        ned.frontLeftDrive.setPower(0.5);
-        ned.frontRightDrive.setPower(-0.5);
-
-        while(!(currentAngle >= targetAngle - 2 && currentAngle <= targetAngle + 2)){
-            currentAngle = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-            telemetry.addData("Target Angle: ", targetAngle);
-            telemetry.addData("Current Angle: ", currentAngle);
-            telemetry.addData("Angle", readAngle());
-            telemetry.update();
-        }
-
-        // Stop all motion after turn
-        ned.frontLeftDrive.setPower(0);
-        ned.frontRightDrive.setPower(0);
-        ned.rearLeftDrive.setPower(0);
-        ned.rearRightDrive.setPower(0);
-    }
 
     public String readAngle() {
         angleControl = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -283,4 +259,9 @@ public class AutonomousTest extends LinearOpMode {
         return "Expansion: " + String.valueOf(angleExpansion.firstAngle) + "\nAngle: Control: " + String.valueOf(angleControl.firstAngle);
     }
 
+    public double readDoubleAngle() {
+        angleControl = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angleExpansion = ned.imuExpansion.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return Double.parseDouble(String.valueOf(angleControl.firstAngle));
+    }
 }
