@@ -170,7 +170,7 @@ public class AutonomousTest extends LinearOpMode {
 
 
             //if one of these is false, the loop will exit and will continue to set power for all wheels to 0
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && ned.frontLeftDrive.isBusy() && ned.frontLeftDrive.isBusy()
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && ned.frontLeftDrive.isBusy() && ned.frontRightDrive.isBusy()
                     && ned.rearLeftDrive.isBusy() && ned.rearRightDrive.isBusy()) {
 
                 if (currentSpeed < speed && !(encoderTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * encoderTarget)) { //TODO create ramp up & ramp down methods edit: this done?
