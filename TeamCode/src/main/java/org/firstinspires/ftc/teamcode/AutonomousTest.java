@@ -92,14 +92,14 @@ public class AutonomousTest extends LinearOpMode {
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         //timeout is a failsafe to stop all motors if it takes too long
-        encoderDrive(DRIVE_SPEED, 24, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
+//        encoderDrive(DRIVE_SPEED, 36, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
         turn(-90, .5);
         sleep(500);
         turn(90, .5);
-        encoderDrive(DRIVE_SPEED, -24, 10.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-        turn(90, .5);
-        sleep(500);
-        turn(90, .5);
+//        encoderDrive(DRIVE_SPEED, -36, 10.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+//        turn(90, .5);
+//        sleep(500);
+//        turn(90, .5);
 
 
         telemetry.addData("Path", "Complete");
@@ -173,15 +173,14 @@ public class AutonomousTest extends LinearOpMode {
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && ned.frontLeftDrive.isBusy() && ned.frontRightDrive.isBusy()
                     && ned.rearLeftDrive.isBusy() && ned.rearRightDrive.isBusy()) {
 
-                if (currentSpeed < speed && !(encoderTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * encoderTarget)) { //TODO create ramp up & ramp down methods edit: this done?
-                    currentSpeed += 0.005;
-
+                if(ned.frontLeftDrive.getCurrentPosition() < encoderTarget/2){   //accelerate in the positive direction
+                    currentSpeed += 0.01;
+                    telemetry.addData("accelerating", "positive");
+                } else if (ned.frontLeftDrive.getCurrentPosition() > encoderTarget/2){    //accelerate in the negative direction
+                    currentSpeed -= 0.01;
+                    telemetry.addData("accelerating", "negative");
                 }
 
-                if (encoderTarget - ned.frontLeftDrive.getCurrentPosition() < 0.25 * encoderTarget) {
-                    //currentSpeed = speed * (newFrontLeftTarget - ned.frontLeftDrive.getCurrentPosition()) / (newFrontLeftTarget);
-                    currentSpeed -= 0.005;
-                }
                 ned.frontLeftDrive.setPower(currentSpeed);
                 ned.frontRightDrive.setPower(currentSpeed);
                 ned.rearLeftDrive.setPower(currentSpeed);
@@ -220,21 +219,30 @@ public class AutonomousTest extends LinearOpMode {
         }
         double increment = .5;
         double power = 0;
-        while (opModeIsActive() && Math.abs(totalAngle - turnAngle) > .1) {
+        while (opModeIsActive() && Math.abs(turnAngle - totalAngle) > .1) {
             deltaAngle = currentAngle - lastAngle;
             totalAngle += deltaAngle;
             currentAngle = readDoubleAngle();
             power += increment;
+
             if (power > speed){
                 power = speed;
             }
             else if (power < (-1)){
                 power = -1;
             }
-            ned.frontLeftDrive.setPower(power);
-            ned.frontRightDrive.setPower(power);
-            ned.rearLeftDrive.setPower(power);
-            ned.rearRightDrive.setPower(power);
+            if (turnAngle > 0){
+                ned.frontLeftDrive.setPower(-power);
+                ned.frontRightDrive.setPower(power);
+                ned.rearLeftDrive.setPower(-power);
+                ned.rearRightDrive.setPower(power);
+            } else {
+                ned.frontLeftDrive.setPower(power);
+                ned.frontRightDrive.setPower(-power);
+                ned.rearLeftDrive.setPower(power);
+                ned.rearRightDrive.setPower(-power);
+            }
+
             if(Math.abs(totalAngle) > Math.abs(turnAngle)){
                 increment = increment * (-0.5);
             }
