@@ -52,15 +52,13 @@ public class HardwareRobot
     public DcMotor frontLeftDrive = null;
 
     //define servos
-    public Servo clawGripServo;
+    public Servo clawServo;
     public Servo clawRotationServo;
+    public Servo shootyBoi;
 
     //define gyros
     BNO055IMU imuControl;
     BNO055IMU imuExpansion;
-
-    public double  clawGripServoPosition = 0.5; // Start at halfway position
-    public double  clawRotationServoPosition = 0.5; // Start at halfway position
 
     //define color & distance sensor
     public ColorSensor colorSensor;
@@ -112,13 +110,15 @@ public class HardwareRobot
         imuExpansion.initialize(parameters);
 
         //initialize hardware variables for servos
-        clawGripServo = hwMap.get(Servo.class, "claw_grip_servo");    //Control Hub Port 0
+        clawServo = hwMap.get(Servo.class, "claw_grip_servo");    //Control Hub Port 0
         clawRotationServo = hwMap.get(Servo.class, "claw_rotation_servo");  //Control Hub Port 0
-
+        shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Control Hub Port 0
         //sets init position for servos
-        clawGripServo.setPosition(clawGripServoPosition);
-        clawRotationServo.setPosition(clawRotationServoPosition);
-
+        
+        clawServo.setPosition(0.5);
+        clawRotationServo.setPosition(0.5);
+        shootyBoi.setPosition(0.5);
+        
         //init hardware variables for color & distance sensors
        // colorSensor = hwMap.get(ColorSensor.class, "color_distance_sensor");
        // distanceSensor = hwMap.get(DistanceSensor.class, "color_distance_sensor");

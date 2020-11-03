@@ -58,25 +58,32 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name="Test Drive Mode", group="Iterative Opmode")
 @Disabled
-public class TestDriveMode extends OpMode {
+public class DriverControl extends OpMode {
     HardwareRobot robot = new HardwareRobot();
 
 
     private ElapsedTime runtime = new ElapsedTime();
 
     boolean debug = false;
+    boolean isOpen = false;
+
+    // Setup a variable for each drive wheel to save power level for telemetry
+    double rearLeftPower;
+    double rearRightPower;
+    double frontLeftPower;
+    double frontRightPower;
 
     //SETS MAX AND MIN POSITIONS FOR SERVOS
-    private static final double RIGHT_MAX_POS     =  0.67;
-    private static final double RIGHT_MIN_POS     =  0.17;
-    private static final double LEFT_MIN_POS     =  0.34;
-    private static final double LEFT_MAX_POS     =  0.84;
+    private static final double CLAW_SERVO_MAX_POS     =  0.67; //TODO
+    private static final double CLAW_ROTATION_MIN_POS     =  0.34;
 
     private static final double INCREMENT   = 0.003;// amount to increase servo
     private static final double DEBUG_INCREMENT = 0.0005; //amt to increase servo in debug (slower)
 
-    private double  rightServoPosition = 0.5; // Start at halfway position
-    private double  leftServoPosition = 0.5; // Start at halfway position
+    private double  clawServoPosition = 0.5; // Start at halfway position
+    private double  clawRotationServoPosition = 0.5; // Start at halfway position
+    private double  shootyBoiServoPosition = 0.5; // Start at halfway position
+
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -112,39 +119,26 @@ public class TestDriveMode extends OpMode {
      */
     @Override
     public void loop() {
-        // Setup a variable for each drive wheel to save power level for telemetry
-        double rearLeftPower;
-        double rearRightPower;
-        double frontLeftPower;
-        double frontRightPower;
-
         if(!debug) {    //runs until debug is true
 
-            if (gamepad1.dpad_right){   //opens the servo arm
-                rightServoPosition += INCREMENT;
-                leftServoPosition -= INCREMENT;
-                if (rightServoPosition >= RIGHT_MAX_POS || leftServoPosition <= LEFT_MIN_POS ) {
-                    rightServoPosition = RIGHT_MAX_POS;
-                    leftServoPosition = LEFT_MIN_POS;
-                }
-                robot.rightArmServo.setPosition(rightServoPosition);
-                robot.leftArmServo.setPosition(leftServoPosition);
-            }
-
-            if (gamepad1.dpad_left) {   //closes the servo arm
-                rightServoPosition -= INCREMENT;
-                leftServoPosition += INCREMENT;
-                if (rightServoPosition <= RIGHT_MIN_POS || leftServoPosition >= LEFT_MAX_POS) {
-                    rightServoPosition = RIGHT_MIN_POS;
-                    leftServoPosition = LEFT_MAX_POS;
-                }
-                robot.rightArmServo.setPosition(rightServoPosition);
-                robot.leftArmServo.setPosition(leftServoPosition);
-            }
-
-            if(gamepad1.dpad_up) {  //will run the debug statement until false
+            if (gamepad1.dpad_up) {  //will run the debug statement until false
                 debug = true;
             }
+
+//            if(gamepad1.a){     //TODO set positions for these
+//                if(isOpen){
+//                    robot.clawServo.setPosition();
+//                    isOpen = !isOpen;
+//                } else {
+//                    robot.clawServo.setPosition();
+//                    isOpen = !isOpen;
+//
+//                }
+//            }
+//            if(gamepad1.right_bumper){
+//                robot.shootyBoi.setPosition();
+//                robot.shootyBoi.setPosition(0.5);
+//            }
 
             //left stick
             double drive  =  gamepad1.left_stick_y;
@@ -155,7 +149,6 @@ public class TestDriveMode extends OpMode {
             //calculates power
             rearLeftPower    = Range.clip(drive - strafe + turn, -1, 1) ;
             rearRightPower   = Range.clip(drive + strafe - turn, -1, 1) ;
-
             frontLeftPower = Range.clip(drive + strafe + turn, -1, 1) ;
             frontRightPower = Range.clip(drive - strafe - turn, -1, 1) ;
 
@@ -173,41 +166,59 @@ public class TestDriveMode extends OpMode {
 
             // Show the elapsed game time.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.update(); //TODO do you need this?
+            telemetry.update();
 
 
 
         } else {    //runs if debug = true
-            //telemetry.addData("Debug mode enabled."); //TODO
+            telemetry.addData("Debug mode: " ,"enabled.");
 
-            if(gamepad1.b) {    //increases left servo slightly
-                leftServoPosition += DEBUG_INCREMENT;
-                if(leftServoPosition >= LEFT_MAX_POS) {
-                    leftServoPosition = LEFT_MAX_POS;
-                }
-                robot.leftArmServo.setPosition(leftServoPosition);
+            //claw servo
+            if(gamepad1.b) {
+                clawServoPosition-= DEBUG_INCREMENT;
+//                if(clawServoPosition >= LEFT_MAX_POS) {
+//                    clawServoPosition = LEFT_MAX_POS;
+//                }
+                robot.clawServo.setPosition(clawServoPosition);
             }
-
-            if(gamepad1.b) {    //decreases left servo slightly
-                leftServoPosition -= DEBUG_INCREMENT;
-                if(leftServoPosition <= LEFT_MIN_POS) {
-                    leftServoPosition = LEFT_MIN_POS;
-                }
-                robot.leftArmServo.setPosition(leftServoPosition);
+            if(gamepad1.x) {
+                clawServoPosition += DEBUG_INCREMENT;
+//                if(clawServoPosition <= RIGHT_MIN_POS) {
+//                    clawServoPosition = RIGHT_MIN_POS;
+//                }
+                robot.clawServo.setPosition(clawServoPosition);
             }
-            if(gamepad1.y) {    //increases right servo slightly
-                rightServoPosition += DEBUG_INCREMENT;
-                if(rightServoPosition >= RIGHT_MAX_POS) {
-                    rightServoPosition = RIGHT_MAX_POS;
-                }
-                robot.rightArmServo.setPosition(rightServoPosition);
+            
+            //rotation servo
+            if(gamepad1.a) {   
+                clawRotationServoPosition += DEBUG_INCREMENT;
+//                if(clawRotationServoPosition <= LEFT_MIN_POS) {
+//                    clawRotationServoPosition = LEFT_MIN_POS;
+//                }
+                robot.clawRotationServo.setPosition(clawRotationServoPosition);
             }
-            if(gamepad1.x) {    //decreases right servo slightly
-                rightServoPosition -= DEBUG_INCREMENT;
-                if(rightServoPosition <= RIGHT_MIN_POS) {
-                    rightServoPosition = RIGHT_MIN_POS;
-                }
-                robot.rightArmServo.setPosition(rightServoPosition);
+            if(gamepad1.y) {
+                clawRotationServoPosition -= DEBUG_INCREMENT;
+//                if(clawRotationServoPosition >= RIGHT_MAX_POS) {
+//                    clawRotationServoPosition = RIGHT_MAX_POS;
+//                }
+                robot.clawRotationServo.setPosition(clawRotationServoPosition);
+            }
+            
+            //shooty boi servo
+            if(gamepad1.right_bumper) {
+                shootyBoiServoPosition += DEBUG_INCREMENT;
+//                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
+//                    shootyBoiServoPosition = RIGHT_MAX_POS;
+//                }
+                robot.shootyBoi.setPosition(shootyBoiServoPosition);
+            }
+            if(gamepad1.left_bumper) {
+                shootyBoiServoPosition -= DEBUG_INCREMENT;
+//                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
+//                    shootyBoiServoPosition = RIGHT_MAX_POS;
+//                }
+                robot.shootyBoi.setPosition(shootyBoiServoPosition);
             }
 
 
@@ -216,8 +227,11 @@ public class TestDriveMode extends OpMode {
             }
 
             //adds telemetry data for servos to phone
-            telemetry.addData("Left servo Position", "%5.2f", leftServoPosition);
-            telemetry.addData("Right servo Position", "%5.2f", rightServoPosition);
+            telemetry.addData("Claw servo Position: ", "%5.2f", clawServoPosition);
+            telemetry.addData("Claw Rotation servo Position: ", "%5.2f", clawRotationServoPosition);
+            telemetry.addData("Shooty Boi servo Position: ", "%5.2f", shootyBoiServoPosition);
+            telemetry.update();
+
         }
 
     }
