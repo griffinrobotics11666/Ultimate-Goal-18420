@@ -165,10 +165,10 @@ public class TestDriveMode extends OpMode {
             robot.frontLeftDrive.setPower(frontLeftPower);
             robot.frontRightDrive.setPower(frontRightPower);
 
-            telemetry.addData("color_sensor_red", robot.colorSensor.red());
-            telemetry.addData("color_sensor_green", robot.colorSensor.green());
-            telemetry.addData("color_sensor_blue", robot.colorSensor.blue());
-            telemetry.addData("distance_sensor_cm", robot.distanceSensor.getDistance(DistanceUnit.CM));
+//            telemetry.addData("color_sensor_red", robot.colorSensor.red());
+//            telemetry.addData("color_sensor_green", robot.colorSensor.green());
+//            telemetry.addData("color_sensor_blue", robot.colorSensor.blue());
+//            telemetry.addData("distance_sensor_cm", robot.distanceSensor.getDistance(DistanceUnit.CM));
 
 
             // Show the elapsed game time.

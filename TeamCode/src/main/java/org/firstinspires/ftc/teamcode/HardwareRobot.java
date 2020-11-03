@@ -50,17 +50,17 @@ public class HardwareRobot
     public DcMotor rearRightDrive = null;
     public DcMotor frontRightDrive = null;
     public DcMotor frontLeftDrive = null;
-    public DcMotor slideMotor = null;
 
     //define servos
-    public Servo rightArmServo;
-    public Servo leftArmServo;
+    public Servo clawGripServo;
+    public Servo clawRotationServo;
 
+    //define gyros
     BNO055IMU imuControl;
     BNO055IMU imuExpansion;
 
-    public double  rightServoPosition = 0.5; // Start at halfway position
-    public double  leftServoPosition = 0.5; // Start at halfway position
+    public double  clawGripServoPosition = 0.5; // Start at halfway position
+    public double  clawRotationServoPosition = 0.5; // Start at halfway position
 
     //define color & distance sensor
     public ColorSensor colorSensor;
@@ -85,8 +85,6 @@ public class HardwareRobot
         rearRightDrive = hwMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
         frontLeftDrive  = hwMap.get(DcMotor.class, "front_left_drive");   //Control Hub Port 3
         frontRightDrive = hwMap.get(DcMotor.class, "front_right_drive");  //Control Hub Port 0
-        //init slide motor
-        //slideMotor = hwMap.get(DcMotor.class, "slide_motor"); //Expansion Hub Port 0
 
         //sets init direction for drive motors
         rearLeftDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -114,12 +112,12 @@ public class HardwareRobot
         imuExpansion.initialize(parameters);
 
         //initialize hardware variables for servos
-       // rightArmServo = hwMap.get(Servo.class, "right_arm_servo");    //Control Hub Port 0
-       // leftArmServo = hwMap.get(Servo.class, "left_arm_servo");  //Control Hub Port 0
+        clawGripServo = hwMap.get(Servo.class, "claw_grip_servo");    //Control Hub Port 0
+        clawRotationServo = hwMap.get(Servo.class, "claw_rotation_servo");  //Control Hub Port 0
 
         //sets init position for servos
-        //rightArmServo.setPosition(rightServoPosition);
-        //leftArmServo.setPosition(leftServoPosition);
+        clawGripServo.setPosition(clawGripServoPosition);
+        clawRotationServo.setPosition(clawRotationServoPosition);
 
         //init hardware variables for color & distance sensors
        // colorSensor = hwMap.get(ColorSensor.class, "color_distance_sensor");
