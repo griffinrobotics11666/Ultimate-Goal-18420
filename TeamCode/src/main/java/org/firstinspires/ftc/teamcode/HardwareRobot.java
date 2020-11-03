@@ -111,8 +111,8 @@ public class HardwareRobot
 
         //initialize hardware variables for servos
         clawServo = hwMap.get(Servo.class, "claw_grip_servo");    //Control Hub Port 0
-        clawRotationServo = hwMap.get(Servo.class, "claw_rotation_servo");  //Control Hub Port 0
-        shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Control Hub Port 0
+        clawRotationServo = hwMap.get(Servo.class, "claw_rotation_servo");  //Control Hub Port 1
+        shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Control Hub Port 2
         //sets init position for servos
         
         clawServo.setPosition(0.5);
