@@ -61,11 +61,11 @@ public class HardwareRobot
     BNO055IMU imuExpansion;
 
     //define color & distance sensor
-    public ColorSensor colorSensor;
-    public DistanceSensor distanceSensor;
+    //public ColorSensor colorSensor;
+    //public DistanceSensor distanceSensor;
 
     /* local OpMode members. */
-    com.qualcomm.robotcore.hardware.HardwareMap hwMap =  null;
+    HardwareMap hwMap =  null;
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
