@@ -142,8 +142,7 @@ public class DriverControl extends OpMode {
 //                robot.shootyBoi.setPosition();
 //                robot.shootyBoi.setPosition(0.5);
 //            }
-            if(gamepad1.y)
-                robot.armMotor.setP
+
             //left stick
             double drive  =  gamepad1.left_stick_y;
             double strafe = -gamepad1.left_stick_x;

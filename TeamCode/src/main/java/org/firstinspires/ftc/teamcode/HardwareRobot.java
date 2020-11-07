@@ -81,8 +81,8 @@ public class HardwareRobot
 
         //Init drive motors
         rearLeftDrive  = hwMap.get(DcMotor.class, "rear_left_drive"); //Expansion Hub Port 0
-        rearRightDrive = hwMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
         frontLeftDrive  = hwMap.get(DcMotor.class, "front_left_drive");   //Expansion Hub Port 1
+        rearRightDrive = hwMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
         frontRightDrive = hwMap.get(DcMotor.class, "front_right_drive");  //Control Hub Port 0
         armMotor = hwMap.get(DcMotor.class, "arm_motor");
 
