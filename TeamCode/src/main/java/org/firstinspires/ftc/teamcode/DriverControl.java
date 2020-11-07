@@ -75,14 +75,22 @@ public class DriverControl extends OpMode {
 
     //SETS MAX AND MIN POSITIONS FOR SERVOS
     private static final double CLAW_SERVO_MAX_POS     =  0.67; //TODO
-    private static final double CLAW_ROTATION_MIN_POS     =  0.34;
+    private static final double CLAW_SERVO_MIN_POS     =  0.34;
+
+    private static final double CLAW_ROTATION_SERVO_MAX_POS     =  0.67; //TODO
+    private static final double CLAW_ROTATION_SERVO_MIN_POS     =  0.34;
+
+    private static final double SHOOTY_BOI_SERVO_FORWARD_POS     =  0.67; //TODO
+    private static final double SHOOTY_BOI_SERVO_BACKWARD_POS     =  0.34;
+
 
     private static final double INCREMENT   = 0.003;// amount to increase servo
     private static final double DEBUG_INCREMENT = 0.0005; //amt to increase servo in debug (slower)
 
-    private double  clawServoPosition = 0.5; // Start at halfway position
-    private double  clawRotationServoPosition = 0.5; // Start at halfway position
-    private double  shootyBoiServoPosition = 0.5; // Start at halfway position
+    //Used for debug
+    private double  clawServoPosition = 0.5;
+    private double  clawRotationServoPosition = 0.5;
+    private double  shootyBoiServoPosition = 0.5;
 
 
     /*
@@ -128,20 +136,21 @@ public class DriverControl extends OpMode {
                 debug = true;
             }
 
-//            if(gamepad1.a){     //TODO set positions for these
-//                if(isOpen){
-//                    robot.clawServo.setPosition();
-//                    isOpen = !isOpen;
-//                } else {
-//                    robot.clawServo.setPosition();
-//                    isOpen = !isOpen;
-//
-//                }
-//            }
-//            if(gamepad1.right_bumper){
-//                robot.shootyBoi.setPosition();
-//                robot.shootyBoi.setPosition(0.5);
-//            }
+            if(gamepad1.a){     //will open/ close claw grip
+                if(isOpen){
+                    robot.clawServo.setPosition(CLAW_SERVO_MIN_POS);
+                    isOpen = false;
+                } else {
+                    robot.clawServo.setPosition(CLAW_SERVO_MAX_POS);
+                    isOpen = true;
+                }
+            }
+
+            if(gamepad1.right_bumper){  //will shoot shooty boi
+                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_FORWARD_POS);
+                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_BACKWARD_POS);
+            }
+
 
             //left stick
             double drive  =  gamepad1.left_stick_y;

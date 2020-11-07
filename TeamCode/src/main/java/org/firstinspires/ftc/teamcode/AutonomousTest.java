@@ -49,7 +49,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 @Autonomous(name="Autonomous Test", group="Linear Opmode")
 //@Disabled
 public class AutonomousTest extends LinearOpMode {
-    HardwareRobot ned = new HardwareRobot();
+    HardwareRobot robot = new HardwareRobot();
 
     Orientation angleExpansion;
     Orientation angleControl;
@@ -69,13 +69,13 @@ public class AutonomousTest extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        ned.init(hardwareMap);
+        robot.init(hardwareMap);
 
         telemetry.addData("Path0", "Starting at %7d :%7d",
-                ned.rearRightDrive.getCurrentPosition(),
-                ned.rearLeftDrive.getCurrentPosition(),
-                ned.frontLeftDrive.getCurrentPosition(),
-                ned.frontRightDrive.getCurrentPosition());
+                robot.rearRightDrive.getCurrentPosition(),
+                robot.rearLeftDrive.getCurrentPosition(),
+                robot.frontLeftDrive.getCurrentPosition(),
+                robot.frontRightDrive.getCurrentPosition());
 
         telemetry.update();
 
@@ -86,11 +86,11 @@ public class AutonomousTest extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        ned.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
-        ned.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        robot.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        robot.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         // Step through each leg of the path,
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
+        // Note: Reverse movement is obtairobot by setting a negative distance (not speed)
         //timeout is a failsafe to stop all motors if it takes too long
 //        encoderDrive(DRIVE_SPEED, 36, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
         turn(-90, .5);
@@ -130,80 +130,80 @@ public class AutonomousTest extends LinearOpMode {
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
             //the motors will come to a hard stop instead of coasting
-            ned.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            ned.frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            ned.rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            ned.rearRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            robot.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            robot.frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            robot.rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            robot.rearRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            ned.rearLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            ned.rearRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             //Reset Encoders
 
-            ned.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            ned.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            ned.rearLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            ned.rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // calculate target positions
-            encoderTarget = ned.frontLeftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            encoderTarget = robot.frontLeftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
 
             //set target positions for motors
-            ned.frontLeftDrive.setTargetPosition(encoderTarget);
-            ned.frontRightDrive.setTargetPosition(encoderTarget);
-            ned.rearLeftDrive.setTargetPosition(encoderTarget);
-            ned.rearRightDrive.setTargetPosition(encoderTarget);
+            robot.frontLeftDrive.setTargetPosition(encoderTarget);
+            robot.frontRightDrive.setTargetPosition(encoderTarget);
+            robot.rearLeftDrive.setTargetPosition(encoderTarget);
+            robot.rearRightDrive.setTargetPosition(encoderTarget);
 
             // Turn On RUN_TO_POSITION
-            ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            ned.rearLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            ned.rearRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // reset the timeout time and start motion.
             runtime.reset();
-            ned.frontLeftDrive.setPower(currentSpeed);
-            ned.frontRightDrive.setPower(currentSpeed);
-            ned.rearLeftDrive.setPower(currentSpeed);
-            ned.rearRightDrive.setPower(currentSpeed);
+            robot.frontLeftDrive.setPower(currentSpeed);
+            robot.frontRightDrive.setPower(currentSpeed);
+            robot.rearLeftDrive.setPower(currentSpeed);
+            robot.rearRightDrive.setPower(currentSpeed);
 
 
             //if one of these is false, the loop will exit and will continue to set power for all wheels to 0
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && ned.frontLeftDrive.isBusy() && ned.frontRightDrive.isBusy()
-                    && ned.rearLeftDrive.isBusy() && ned.rearRightDrive.isBusy()) {
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.frontLeftDrive.isBusy() && robot.frontRightDrive.isBusy()
+                    && robot.rearLeftDrive.isBusy() && robot.rearRightDrive.isBusy()) {
 
-                if(ned.frontLeftDrive.getCurrentPosition() < encoderTarget/2){   //accelerate in the positive direction
+                if(robot.frontLeftDrive.getCurrentPosition() < encoderTarget/2){   //accelerate in the positive direction
                     currentSpeed += 0.01;
                     telemetry.addData("accelerating", "positive");
-                } else if (ned.frontLeftDrive.getCurrentPosition() > encoderTarget/2){    //accelerate in the negative direction
+                } else if (robot.frontLeftDrive.getCurrentPosition() > encoderTarget/2){    //accelerate in the negative direction
                     currentSpeed -= 0.01;
                     telemetry.addData("accelerating", "negative");
                 }
 
-                ned.frontLeftDrive.setPower(currentSpeed);
-                ned.frontRightDrive.setPower(currentSpeed);
-                ned.rearLeftDrive.setPower(currentSpeed);
-                ned.rearRightDrive.setPower(currentSpeed);
+                robot.frontLeftDrive.setPower(currentSpeed);
+                robot.frontRightDrive.setPower(currentSpeed);
+                robot.rearLeftDrive.setPower(currentSpeed);
+                robot.rearRightDrive.setPower(currentSpeed);
                 telemetry.addData("Current Speed", currentSpeed);
                 // Display it for the driver.
                 telemetry.addData("Path1", "Running to %7d", encoderTarget);
-                telemetry.addData("Path2", "Running at %7d", ned.frontLeftDrive.getCurrentPosition());
+                telemetry.addData("Path2", "Running at %7d", robot.frontLeftDrive.getCurrentPosition());
                 telemetry.update();
             }
 
 
             // Stop all motion;
-            ned.frontLeftDrive.setPower(0);
-            ned.frontRightDrive.setPower(0);
-            ned.rearLeftDrive.setPower(0);
-            ned.rearRightDrive.setPower(0);
+            robot.frontLeftDrive.setPower(0);
+            robot.frontRightDrive.setPower(0);
+            robot.rearLeftDrive.setPower(0);
+            robot.rearRightDrive.setPower(0);
 
             // Turn off RUN_TO_POSITION
-            ned.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            ned.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            ned.rearLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            ned.rearRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             sleep(250);   // optional pause after each move
         }
@@ -232,37 +232,37 @@ public class AutonomousTest extends LinearOpMode {
                 power = -1;
             }
             if (turnAngle > 0){
-                ned.frontLeftDrive.setPower(-power);
-                ned.frontRightDrive.setPower(power);
-                ned.rearLeftDrive.setPower(-power);
-                ned.rearRightDrive.setPower(power);
+                robot.frontLeftDrive.setPower(-power);
+                robot.frontRightDrive.setPower(power);
+                robot.rearLeftDrive.setPower(-power);
+                robot.rearRightDrive.setPower(power);
             } else {
-                ned.frontLeftDrive.setPower(power);
-                ned.frontRightDrive.setPower(-power);
-                ned.rearLeftDrive.setPower(power);
-                ned.rearRightDrive.setPower(-power);
+                robot.frontLeftDrive.setPower(power);
+                robot.frontRightDrive.setPower(-power);
+                robot.rearLeftDrive.setPower(power);
+                robot.rearRightDrive.setPower(-power);
             }
 
             if(Math.abs(totalAngle) > Math.abs(turnAngle)){
                 increment = increment * (-0.5);
             }
         }
-            ned.frontLeftDrive.setPower (0);
-            ned.frontRightDrive.setPower(0);
-            ned.rearLeftDrive.setPower(0);
-            ned.rearRightDrive.setPower(0);
+            robot.frontLeftDrive.setPower (0);
+            robot.frontRightDrive.setPower(0);
+            robot.rearLeftDrive.setPower(0);
+            robot.rearRightDrive.setPower(0);
 
     }
 
 
     public String readAngle() {
-        angleControl = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        angleExpansion = ned.imuExpansion.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angleControl = robot.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angleExpansion = robot.imuExpansion.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return "Expansion: " + String.valueOf(angleExpansion.firstAngle) + "\nAngle: Control: " + String.valueOf(angleControl.firstAngle);
     }
 
     public double readDoubleAngle() {
-        angleControl = ned.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angleControl = robot.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return angleControl.firstAngle;
     }
 }
