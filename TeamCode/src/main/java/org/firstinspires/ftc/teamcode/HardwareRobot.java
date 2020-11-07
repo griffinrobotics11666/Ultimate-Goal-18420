@@ -85,13 +85,15 @@ public class HardwareRobot
         frontLeftDrive  = hwMap.get(DcMotor.class, "front_left_drive");   //Expansion Hub Port 1
         rearRightDrive = hwMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
         frontRightDrive = hwMap.get(DcMotor.class, "front_right_drive");  //Control Hub Port 0
-        armMotor = hwMap.get(DcMotor.class, "arm_motor");
+        armMotor = hwMap.get(DcMotor.class, "arm_motor");   //control hub port 2
+
         //sets init direction for drive motors
         rearLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         rearRightDrive.setDirection(DcMotor.Direction.FORWARD);
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         armMotor.setDirection((DcMotor.Direction.FORWARD));
+
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
@@ -115,8 +117,8 @@ public class HardwareRobot
         clawServo = hwMap.get(Servo.class, "claw_grip_servo");    //Control Hub Port 0
         clawRotationServo = hwMap.get(Servo.class, "claw_rotation_servo");  //Control Hub Port 1
         shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Control Hub Port 2
+
         //sets init position for servos
-        
         clawServo.setPosition(0.5);
         clawRotationServo.setPosition(0.5);
         shootyBoi.setPosition(0.5);

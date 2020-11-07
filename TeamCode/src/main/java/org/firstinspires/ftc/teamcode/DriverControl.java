@@ -99,11 +99,16 @@ public class DriverControl extends OpMode {
     @Override
     public void init() {
         robot.init(hardwareMap);
-        //set DC motors to run w/o encoders
+        //set Drive motors to run w/o encoders
         robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        //set arm Motor to run with encoder
+        robot.armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        robot.armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -151,15 +156,6 @@ public class DriverControl extends OpMode {
                 robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_BACKWARD_POS);
             }
 
-            if(gamepad1.y){
-                robot.armMotor.setPower(.1);
-            }
-            else if (gamepad1.x){
-                robot.armMotor.setPower(-.1);
-            }
-            else{
-                robot.armMotor.setPower(0);
-            }
             //left stick
             double drive  =  gamepad1.left_stick_y;
             double strafe = -gamepad1.left_stick_x;
@@ -241,6 +237,17 @@ public class DriverControl extends OpMode {
                 robot.shootyBoi.setPosition(shootyBoiServoPosition);
             }
 
+            //arm Motor
+            if(gamepad1.y){
+                robot.armMotor.setPower(.1);
+            }
+            else if (gamepad1.x){
+                robot.armMotor.setPower(-.1);
+            }
+            else{
+                robot.armMotor.setPower(0);
+            }
+
 
             if(gamepad1.dpad_down) {    //will exit out of loop if down is pressed
                 debug = false;
@@ -250,6 +257,7 @@ public class DriverControl extends OpMode {
             telemetry.addData("Claw servo Position: ", "%5.2f", clawServoPosition);
             telemetry.addData("Claw Rotation servo Position: ", "%5.2f", clawRotationServoPosition);
             telemetry.addData("Shooty Boi servo Position: ", "%5.2f", shootyBoiServoPosition);
+            telemetry.addData("Arm Motor ", "Position: %7d", robot.armMotor.getCurrentPosition());
             telemetry.update();
 
         }
