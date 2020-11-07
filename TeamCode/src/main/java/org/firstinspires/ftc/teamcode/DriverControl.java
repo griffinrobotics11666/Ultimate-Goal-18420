@@ -80,8 +80,8 @@ public class DriverControl extends OpMode {
     private static final double CLAW_ROTATION_SERVO_MAX_POS     =  0.67; //TODO
     private static final double CLAW_ROTATION_SERVO_MIN_POS     =  0.34;
 
-    private static final double SHOOTY_BOI_SERVO_FORWARD_POS     =  0.67; //TODO
-    private static final double SHOOTY_BOI_SERVO_BACKWARD_POS     =  0.34;
+//    private static final double SHOOTY_BOI_SERVO_FORWARD_POS     =  0.67; //TODO
+//    private static final double SHOOTY_BOI_SERVO_BACKWARD_POS     =  0.34;
 
 
     private static final double INCREMENT   = 0.003;// amount to increase servo
@@ -90,7 +90,7 @@ public class DriverControl extends OpMode {
     //Used for debug
     private double  clawServoPosition = 0.5;
     private double  clawRotationServoPosition = 0.5;
-    private double  shootyBoiServoPosition = 0.5;
+   // private double  shootyBoiServoPosition = 0.5;
 
 
     /*
@@ -151,10 +151,10 @@ public class DriverControl extends OpMode {
                 }
             }
 
-            if(gamepad1.right_bumper){  //will shoot shooty boi
-                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_FORWARD_POS);
-                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_BACKWARD_POS);
-            }
+//            if(gamepad1.right_bumper){  //will shoot shooty boi
+//                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_FORWARD_POS);
+//                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_BACKWARD_POS);
+//            }
 
             //left stick
             double drive  =  gamepad1.left_stick_y;
@@ -222,20 +222,20 @@ public class DriverControl extends OpMode {
             }
             
             //shooty boi servo
-            if(gamepad1.right_bumper) {
-                shootyBoiServoPosition += DEBUG_INCREMENT;
-//                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
-//                    shootyBoiServoPosition = RIGHT_MAX_POS;
-//                }
-                robot.shootyBoi.setPosition(shootyBoiServoPosition);
-            }
-            if(gamepad1.left_bumper) {
-                shootyBoiServoPosition -= DEBUG_INCREMENT;
-//                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
-//                    shootyBoiServoPosition = RIGHT_MAX_POS;
-//                }
-                robot.shootyBoi.setPosition(shootyBoiServoPosition);
-            }
+//            if(gamepad1.right_bumper) {
+//                shootyBoiServoPosition += DEBUG_INCREMENT;
+////                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
+////                    shootyBoiServoPosition = RIGHT_MAX_POS;
+////                }
+//                robot.shootyBoi.setPosition(shootyBoiServoPosition);
+//            }
+//            if(gamepad1.left_bumper) {
+//                shootyBoiServoPosition -= DEBUG_INCREMENT;
+////                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
+////                    shootyBoiServoPosition = RIGHT_MAX_POS;
+////                }
+//                robot.shootyBoi.setPosition(shootyBoiServoPosition);
+//            }
 
             //arm Motor
             if(gamepad1.y){
@@ -256,7 +256,7 @@ public class DriverControl extends OpMode {
             //adds telemetry data for servos to phone
             telemetry.addData("Claw servo Position: ", "%5.2f", clawServoPosition);
             telemetry.addData("Claw Rotation servo Position: ", "%5.2f", clawRotationServoPosition);
-            telemetry.addData("Shooty Boi servo Position: ", "%5.2f", shootyBoiServoPosition);
+            //telemetry.addData("Shooty Boi servo Position: ", "%5.2f", shootyBoiServoPosition);
             telemetry.addData("Arm Motor ", "Position: %7d", robot.armMotor.getCurrentPosition());
             telemetry.update();
 
