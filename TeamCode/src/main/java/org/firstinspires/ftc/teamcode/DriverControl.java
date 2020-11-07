@@ -151,7 +151,15 @@ public class DriverControl extends OpMode {
                 robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_BACKWARD_POS);
             }
 
-
+            if(gamepad1.y){
+                robot.armMotor.setPower(.1);
+            }
+            else if (gamepad1.x){
+                robot.armMotor.setPower(-.1);
+            }
+            else{
+                robot.armMotor.setPower(0);
+            }
             //left stick
             double drive  =  gamepad1.left_stick_y;
             double strafe = -gamepad1.left_stick_x;
