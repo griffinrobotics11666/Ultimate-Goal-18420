@@ -52,6 +52,7 @@ public class HardwareRobot
     public DcMotor frontRightDrive = null;
     public DcMotor frontLeftDrive = null;
     public DcMotor armMotor = null;
+    public DcMotor shootyMotor = null;
 
     //define servos
     public Servo clawServo;
@@ -85,15 +86,17 @@ public class HardwareRobot
         rearLeftDrive  = hwMap.get(DcMotor.class, "rear_left_drive"); //Expansion Hub Port 1
         frontRightDrive = hwMap.get(DcMotor.class, "front_right_drive");  //Control Hub Port 0
         rearRightDrive = hwMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
-
         armMotor = hwMap.get(DcMotor.class, "arm_motor");   //control hub port 2
+        shootyMotor = hwMap.get(DcMotor.class, "shooty_motor");   //expansion hub port 2
+
 
         //sets init direction for drive motors
-        rearLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rearRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        armMotor.setDirection((DcMotor.Direction.FORWARD));
+        rearLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rearRightDrive.setDirection(DcMotor.Direction.REVERSE);
+        frontLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        frontRightDrive.setDirection(DcMotor.Direction.REVERSE);
+        armMotor.setDirection(DcMotor.Direction.FORWARD);
+        shootyMotor.setDirection(DcMotor.Direction.REVERSE);
 
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
@@ -117,10 +120,10 @@ public class HardwareRobot
         //initialize hardware variables for servos
         clawServo = hwMap.get(Servo.class, "claw_grip_servo");    //Control Hub Port 0
         clawRotationServo = hwMap.get(Servo.class, "claw_rotation_servo");  //Control Hub Port 1
-        //shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Control Hub Port 2
+        shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Expansion Hub Port 0
 
         //sets init position for servos
-        clawServo.setPosition(0.5);
+        clawServo.setPosition(0.35);
         clawRotationServo.setPosition(0.5);
         shootyBoi.setPosition(0.5);
         

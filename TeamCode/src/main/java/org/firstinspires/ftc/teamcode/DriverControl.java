@@ -65,7 +65,9 @@ public class DriverControl extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     boolean debug = false;
-    boolean isOpen = false;
+    boolean isOpen = true, isOpenChanged = false;
+    boolean shootyIsRunning = false, shootyIsRunningChanged = false;
+    //boolean shootyBoiMoving = false;
 
     // Setup a variable for each drive wheel to save power level for telemetry
     double rearLeftPower;
@@ -73,24 +75,26 @@ public class DriverControl extends OpMode {
     double frontLeftPower;
     double frontRightPower;
 
+
+
     //SETS MAX AND MIN POSITIONS FOR SERVOS
-    private static final double CLAW_SERVO_MAX_POS     =  0.67; //TODO
-    private static final double CLAW_SERVO_MIN_POS     =  0.34;
+    private static final double CLAW_SERVO_OPEN_POS     =  0.35;
+    private static final double CLAW_SERVO_CLOSE_POS     =  0.52;
 
-    private static final double CLAW_ROTATION_SERVO_MAX_POS     =  0.67; //TODO
-    private static final double CLAW_ROTATION_SERVO_MIN_POS     =  0.34;
+    private static final double CLAW_ROTATION_SERVO__POS     =  0.47;
+    private static final double CLAW_ROTATION_SERVO_MIN_POS     =  0.49;
 
-//    private static final double SHOOTY_BOI_SERVO_FORWARD_POS     =  0.67; //TODO
-//    private static final double SHOOTY_BOI_SERVO_BACKWARD_POS     =  0.34;
+    private static final double SHOOTY_BOI_SERVO_FORWARD_POS     =  0.67; //TODO
+    private static final double SHOOTY_BOI_SERVO_BACKWARD_POS     =  0.34;
 
 
     private static final double INCREMENT   = 0.003;// amount to increase servo
     private static final double DEBUG_INCREMENT = 0.0005; //amt to increase servo in debug (slower)
 
     //Used for debug
-    private double  clawServoPosition = 0.5;
+    private double  clawServoPosition = 0.35;
     private double  clawRotationServoPosition = 0.5;
-   // private double  shootyBoiServoPosition = 0.5;
+    private double  shootyBoiServoPosition = 0.5;
 
 
     /*
@@ -104,11 +108,15 @@ public class DriverControl extends OpMode {
         robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.shootyMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
         //set arm Motor to run with encoder
         robot.armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        robot.armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        robot.armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -141,20 +149,29 @@ public class DriverControl extends OpMode {
                 debug = true;
             }
 
-            if(gamepad1.a){     //will open/ close claw grip
-                if(isOpen){
-                    robot.clawServo.setPosition(CLAW_SERVO_MIN_POS);
-                    isOpen = false;
-                } else {
-                    robot.clawServo.setPosition(CLAW_SERVO_MAX_POS);
-                    isOpen = true;
-                }
+            if(gamepad1.a && !isOpenChanged){   //toggles open and close of claw servo
+                robot.clawServo.setPosition(isOpen ? CLAW_SERVO_CLOSE_POS : CLAW_SERVO_OPEN_POS);
+                isOpen = !isOpen;
+                isOpenChanged = true;
+            } else if (!gamepad1.a) {
+                isOpenChanged = false;
             }
 
-//            if(gamepad1.right_bumper){  //will shoot shooty boi
-//                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_FORWARD_POS);
-//                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_BACKWARD_POS);
-//            }
+            if(gamepad1.right_bumper){  //will shoot shooty boi TODO add  && !shootyBoiMoving if including
+                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_FORWARD_POS);
+                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_BACKWARD_POS);
+                //shootyBoiMoving = true;
+//            } else if (!gamepad1.right_bumper) {
+//                shootyBoiMoving = false;
+            }
+
+            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 1);
+                shootyIsRunning = !shootyIsRunning;
+                shootyIsRunningChanged = true;
+            } else if (!gamepad1.start) {
+                shootyIsRunningChanged = false;
+            }
 
             //left stick
             double drive  =  gamepad1.left_stick_y;
@@ -182,6 +199,8 @@ public class DriverControl extends OpMode {
 
             // Show the elapsed game time.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Is Open", ": " + isOpen);
+
             telemetry.update();
 
 
@@ -222,27 +241,27 @@ public class DriverControl extends OpMode {
             }
             
             //shooty boi servo
-//            if(gamepad1.right_bumper) {
-//                shootyBoiServoPosition += DEBUG_INCREMENT;
-////                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
-////                    shootyBoiServoPosition = RIGHT_MAX_POS;
-////                }
-//                robot.shootyBoi.setPosition(shootyBoiServoPosition);
-//            }
-//            if(gamepad1.left_bumper) {
-//                shootyBoiServoPosition -= DEBUG_INCREMENT;
-////                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
-////                    shootyBoiServoPosition = RIGHT_MAX_POS;
-////                }
-//                robot.shootyBoi.setPosition(shootyBoiServoPosition);
-//            }
+            if(gamepad1.right_bumper) {
+                shootyBoiServoPosition += DEBUG_INCREMENT;
+//                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
+//                    shootyBoiServoPosition = RIGHT_MAX_POS;
+//                }
+                robot.shootyBoi.setPosition(shootyBoiServoPosition);
+            }
+            if(gamepad1.left_bumper) {
+                shootyBoiServoPosition -= DEBUG_INCREMENT;
+//                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
+//                    shootyBoiServoPosition = RIGHT_MAX_POS;
+//                }
+                robot.shootyBoi.setPosition(shootyBoiServoPosition);
+            }
 
             //arm Motor
-            if(gamepad1.y){
-                robot.armMotor.setPower(.1);
+            if(gamepad1.dpad_right){
+                robot.armMotor.setPower(.3);
             }
-            else if (gamepad1.x){
-                robot.armMotor.setPower(-.1);
+            else if (gamepad1.dpad_left){
+                robot.armMotor.setPower(-.3);
             }
             else{
                 robot.armMotor.setPower(0);
@@ -254,9 +273,9 @@ public class DriverControl extends OpMode {
             }
 
             //adds telemetry data for servos to phone
-            telemetry.addData("Claw servo Position: ", "%5.2f", clawServoPosition);
-            telemetry.addData("Claw Rotation servo Position: ", "%5.2f", clawRotationServoPosition);
-            //telemetry.addData("Shooty Boi servo Position: ", "%5.2f", shootyBoiServoPosition);
+            telemetry.addData("Claw servo Position: ", "%5.2f", robot.clawServo.getPosition());
+            telemetry.addData("Claw Rotation servo Position: ", "%5.2f", robot.clawRotationServo.getPosition());
+            telemetry.addData("Shooty Boi servo Position: ", "%5.2f", shootyBoiServoPosition);
             telemetry.addData("Arm Motor ", "Position: %7d", robot.armMotor.getCurrentPosition());
             telemetry.update();
 
