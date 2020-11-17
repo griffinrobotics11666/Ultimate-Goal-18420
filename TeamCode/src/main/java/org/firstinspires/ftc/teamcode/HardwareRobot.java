@@ -124,7 +124,7 @@ public class HardwareRobot
 
         //sets init position for servos
         clawServo.setPosition(0.35);
-        clawRotationServo.setPosition(0.5);
+        clawRotationServo.setPosition(0.35);
         shootyBoi.setPosition(0.5);
         
         //init hardware variables for color & distance sensors

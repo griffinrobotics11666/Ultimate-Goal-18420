@@ -118,6 +118,8 @@ public class DriverControl extends OpMode {
         robot.armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
+
+
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
     }
@@ -145,7 +147,7 @@ public class DriverControl extends OpMode {
     public void loop() {
         if(!debug) {    //runs until debug is true
 
-            if (gamepad1.dpad_up) {  //will run the debug statement until false
+            if (gamepad1.guide) {  //will run the debug statement until false
                 debug = true;
             }
 
@@ -154,8 +156,26 @@ public class DriverControl extends OpMode {
                 isOpen = !isOpen;
                 isOpenChanged = true;
             } else if (!gamepad1.a) {
+
                 isOpenChanged = false;
             }
+
+            if(gamepad1.y){
+                robot.clawServo.setPosition(0.3);
+                robot.clawRotationServo.setPosition(0.35);
+                robot.armMotor.setTargetPosition(1135);
+                robot.armMotor.setPower(0.05);
+            }
+
+            if (gamepad1.dpad_up) {
+                robot.armMotor.setPower(0.05);
+            } else if (gamepad1.dpad_down) {
+                robot.armMotor.setPower(-0.1);
+            } else {
+                robot.armMotor.setPower(0);
+            }
+
+
 
             if(gamepad1.right_bumper){  //will shoot shooty boi TODO add  && !shootyBoiMoving if including
                 robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_FORWARD_POS);
@@ -165,7 +185,7 @@ public class DriverControl extends OpMode {
 //                shootyBoiMoving = false;
             }
 
-            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+            if(gamepad1.options && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
                 robot.shootyMotor.setPower(shootyIsRunning ? 0 : 1);
                 shootyIsRunning = !shootyIsRunning;
                 shootyIsRunningChanged = true;
@@ -268,7 +288,7 @@ public class DriverControl extends OpMode {
             }
 
 
-            if(gamepad1.dpad_down) {    //will exit out of loop if down is pressed
+            if(gamepad1.guide) {    //will exit out of loop if down is pressed
                 debug = false;
             }
 
