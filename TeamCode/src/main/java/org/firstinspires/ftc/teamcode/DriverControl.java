@@ -66,7 +66,9 @@ public class DriverControl extends OpMode {
 
     boolean debug = false;
     boolean isOpen = true, isOpenChanged = false;
+    boolean isRoofRaised = true; // true: arm is up, false: arm is down
     boolean shootyIsRunning = false, shootyIsRunningChanged = false;
+    boolean isShooting = false, shootyIsShootingChanged = false;
     //boolean shootyBoiMoving = false;
 
     // Setup a variable for each drive wheel to save power level for telemetry
@@ -84,8 +86,8 @@ public class DriverControl extends OpMode {
     private static final double CLAW_ROTATION_SERVO__POS     =  0.47;
     private static final double CLAW_ROTATION_SERVO_MIN_POS     =  0.49;
 
-    private static final double SHOOTY_BOI_SERVO_FORWARD_POS     =  0.67; //TODO
-    private static final double SHOOTY_BOI_SERVO_BACKWARD_POS     =  0.34;
+    private static final double SHOOTY_BOI_SERVO_SHOOT_POS     =  0.64;
+    private static final double SHOOTY_BOI_SERVO_LOAD_POS     =  0.47;
 
 
     private static final double INCREMENT   = 0.003;// amount to increase servo
@@ -115,7 +117,15 @@ public class DriverControl extends OpMode {
         robot.armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //        robot.armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+
+
+
+        robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
+
 
 
 
@@ -145,9 +155,12 @@ public class DriverControl extends OpMode {
      */
     @Override
     public void loop() {
+        boolean isTouchingSensor = !robot.touchyKid.getState();
+
+
         if(!debug) {    //runs until debug is true
 
-            if (gamepad1.guide) {  //will run the debug statement until false
+            if (gamepad1.back) {  //will run the debug statement until false
                 debug = true;
             }
 
@@ -156,36 +169,58 @@ public class DriverControl extends OpMode {
                 isOpen = !isOpen;
                 isOpenChanged = true;
             } else if (!gamepad1.a) {
-
                 isOpenChanged = false;
             }
 
-            if(gamepad1.y){
-                robot.clawServo.setPosition(0.3);
-                robot.clawRotationServo.setPosition(0.35);
-                robot.armMotor.setTargetPosition(1135);
-                robot.armMotor.setPower(0.05);
-            }
-
-            if (gamepad1.dpad_up) {
-                robot.armMotor.setPower(0.05);
-            } else if (gamepad1.dpad_down) {
+            if(gamepad1.y && isRoofRaised){
+                if(isTouchingSensor) {   //checks if limit switch is closed
+                    robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    robot.armMotor.setTargetPosition(5562);
+                    robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    robot.armMotor.setPower(0.1);
+                    if(robot.armMotor.getCurrentPosition() == 5562){
+                        robot.armMotor.setPower(0.0);
+                    }
+                    isRoofRaised = false;
+                } else if (!isTouchingSensor){
+                    robot.armMotor.setPower(-0.1);
+                    if(isTouchingSensor && robot.armMotor.isBusy()){
+                        robot.armMotor.setPower(0);
+                    }
+                    robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    robot.armMotor.setTargetPosition(5562);
+                    robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    robot.armMotor.setPower(0.1);
+                    if(robot.armMotor.getCurrentPosition() == 5562){
+                        robot.armMotor.setPower(0.0);
+                    }
+                    isRoofRaised = false;
+                }
+            }  else if(gamepad1.y && !isRoofRaised){
                 robot.armMotor.setPower(-0.1);
-            } else {
-                robot.armMotor.setPower(0);
+                if(robot.armMotor.getCurrentPosition() == 5562){
+                    robot.armMotor.setPower(0.0);
+                }
+                robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                isRoofRaised = true;
             }
 
 
-
-            if(gamepad1.right_bumper){  //will shoot shooty boi TODO add  && !shootyBoiMoving if including
-                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_FORWARD_POS);
-                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_BACKWARD_POS);
-                //shootyBoiMoving = true;
-//            } else if (!gamepad1.right_bumper) {
-//                shootyBoiMoving = false;
+            if(gamepad1.right_bumper && !shootyIsShootingChanged){   //toggles open and close of claw servo
+                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_SHOOT_POS);
+                double pressTime = runtime.milliseconds();
+                while(runtime.milliseconds()-pressTime < 250){  //wait until the shooty servo has fully moves forward.
+                    telemetry.addData("Wait " ,"true");
+                    telemetry.update();
+                }
+                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
+                isShooting = !isShooting;
+                shootyIsShootingChanged = true;
+            } else if (!gamepad1.right_bumper) {
+                shootyIsShootingChanged = false;
             }
 
-            if(gamepad1.options && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
                 robot.shootyMotor.setPower(shootyIsRunning ? 0 : 1);
                 shootyIsRunning = !shootyIsRunning;
                 shootyIsRunningChanged = true;
@@ -220,39 +255,43 @@ public class DriverControl extends OpMode {
             // Show the elapsed game time.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Is Open", ": " + isOpen);
+            telemetry.addData("Is roof raised", ": " + isRoofRaised);
+            telemetry.addData("Is Touching sensor", ": " + isTouchingSensor);
 
             telemetry.update();
 
 
 
         } else {    //runs if debug = true
+
+
             telemetry.addData("Debug mode: " ,"enabled.");
 
             //claw servo
             if(gamepad1.b) {
-                clawServoPosition-= DEBUG_INCREMENT;
-//                if(clawServoPosition >= LEFT_MAX_POS) {
-//                    clawServoPosition = LEFT_MAX_POS;
-//                }
-                robot.clawServo.setPosition(clawServoPosition);
-            }
-            if(gamepad1.x) {
                 clawServoPosition += DEBUG_INCREMENT;
 //                if(clawServoPosition <= RIGHT_MIN_POS) {
 //                    clawServoPosition = RIGHT_MIN_POS;
 //                }
                 robot.clawServo.setPosition(clawServoPosition);
             }
+            if(gamepad1.a) {
+                clawServoPosition-= DEBUG_INCREMENT;
+//                if(clawServoPosition >= LEFT_MAX_POS) {
+//                    clawServoPosition = LEFT_MAX_POS;
+//                }
+                robot.clawServo.setPosition(clawServoPosition);
+            }
             
             //rotation servo
-            if(gamepad1.a) {   
+            if(gamepad1.y) {
                 clawRotationServoPosition += DEBUG_INCREMENT;
 //                if(clawRotationServoPosition <= LEFT_MIN_POS) {
 //                    clawRotationServoPosition = LEFT_MIN_POS;
 //                }
                 robot.clawRotationServo.setPosition(clawRotationServoPosition);
             }
-            if(gamepad1.y) {
+            if(gamepad1.x) {
                 clawRotationServoPosition -= DEBUG_INCREMENT;
 //                if(clawRotationServoPosition >= RIGHT_MAX_POS) {
 //                    clawRotationServoPosition = RIGHT_MAX_POS;
@@ -276,19 +315,27 @@ public class DriverControl extends OpMode {
                 robot.shootyBoi.setPosition(shootyBoiServoPosition);
             }
 
-            //arm Motor
-            if(gamepad1.dpad_right){
-                robot.armMotor.setPower(.3);
+            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 1);
+                shootyIsRunning = !shootyIsRunning;
+                shootyIsRunningChanged = true;
+            } else if (!gamepad1.start) {
+                shootyIsRunningChanged = false;
             }
-            else if (gamepad1.dpad_left){
+
+            //arm Motor
+            if(gamepad1.dpad_up){
                 robot.armMotor.setPower(-.3);
+            }
+            else if (gamepad1.dpad_down){
+                robot.armMotor.setPower(.3);
             }
             else{
                 robot.armMotor.setPower(0);
             }
 
 
-            if(gamepad1.guide) {    //will exit out of loop if down is pressed
+            if(gamepad1.back) {    //will exit out of loop if down is pressed
                 debug = false;
             }
 
@@ -297,11 +344,13 @@ public class DriverControl extends OpMode {
             telemetry.addData("Claw Rotation servo Position: ", "%5.2f", robot.clawRotationServo.getPosition());
             telemetry.addData("Shooty Boi servo Position: ", "%5.2f", shootyBoiServoPosition);
             telemetry.addData("Arm Motor ", "Position: %7d", robot.armMotor.getCurrentPosition());
+            telemetry.addData("touchyKid", robot.touchyKid.getState()); //TODO this is not running
             telemetry.update();
 
         }
 
     }
+
 
     /*
      * Code to run ONCE after the driver hits STOP
@@ -309,5 +358,7 @@ public class DriverControl extends OpMode {
     @Override
     public void stop() {
     }
+
+
 
 }

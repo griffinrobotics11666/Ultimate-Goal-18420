@@ -34,10 +34,13 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorDigitalTouch;
 
 /**
  * This is NOT an opmode.
@@ -58,6 +61,9 @@ public class HardwareRobot
     public Servo clawServo;
     public Servo clawRotationServo;
     public Servo shootyBoi;
+
+    //define buttons
+    public DigitalChannel touchyKid = null;
 
     //define gyros
     BNO055IMU imuControl;
@@ -88,7 +94,7 @@ public class HardwareRobot
         rearRightDrive = hwMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
         armMotor = hwMap.get(DcMotor.class, "arm_motor");   //control hub port 2
         shootyMotor = hwMap.get(DcMotor.class, "shooty_motor");   //expansion hub port 2
-
+        touchyKid = hwMap.get(DigitalChannel.class, "sensor_digital");
 
         //sets init direction for drive motors
         rearLeftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -120,7 +126,7 @@ public class HardwareRobot
         //initialize hardware variables for servos
         clawServo = hwMap.get(Servo.class, "claw_grip_servo");    //Control Hub Port 0
         clawRotationServo = hwMap.get(Servo.class, "claw_rotation_servo");  //Control Hub Port 1
-        shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Expansion Hub Port 0
+        shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Expansion Hub Port 1
 
         //sets init position for servos
         clawServo.setPosition(0.35);
