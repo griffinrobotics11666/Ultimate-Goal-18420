@@ -81,10 +81,10 @@ public class DriverControl extends OpMode {
 
     //SETS MAX AND MIN POSITIONS FOR SERVOS
     private static final double CLAW_SERVO_OPEN_POS     =  0.35;
-    private static final double CLAW_SERVO_CLOSE_POS     =  0.6;
+    private static final double CLAW_SERVO_CLOSE_POS     =  0.55;
 
-    private static final double SHOOTY_ROTATION_LAUNCH_POS     =  0.35;//todo
-    private static final double SHOOTY_ROTATION_FLAT_POS     =  0.35;
+    private static final double SHOOTY_ROTATION_LAUNCH_POS     =  0;//todo
+    private static final double SHOOTY_ROTATION_FLAT_POS     =  0.64;
 
     private static final double CLAW_ROTATION_SERVO_PICKUP     =  0.35;
     private static final double CLAW_ROTATION_SERVO_DROP     =  0.49;
@@ -169,13 +169,26 @@ public class DriverControl extends OpMode {
                 isOpenChanged = false;
             }
 
-            if(gamepad1.b && !isBchanged){   //toggles position of shooty rotation servo
-                robot.shootyRotaion.setPosition(inLaunchPos ? SHOOTY_ROTATION_FLAT_POS : SHOOTY_ROTATION_LAUNCH_POS);
-                inLaunchPos = !inLaunchPos;
-                isBchanged = true;
-            } else if (!gamepad1.b) {
-                isBchanged = false;
+            if(gamepad1.dpad_left) {
+                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() - 0.01);
+                if(robot.shootyRotaion.getPosition() < 0){
+                    robot.shootyRotaion.setPosition(0);
+                }
+            } else if(gamepad1.dpad_right) {
+                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() + 0.01);
+                if(robot.shootyRotaion.getPosition() > 1){
+                    robot.shootyRotaion.setPosition(1);
+                }
             }
+            telemetry.addData("Shooty Rotation servo Position: ", "%5.2f", robot.shootyRotaion.getPosition());
+
+//            if(gamepad1.b && !isBchanged){   //toggles position of shooty rotation servo
+//                robot.shootyRotaion.setPosition(inLaunchPos ? SHOOTY_ROTATION_FLAT_POS : SHOOTY_ROTATION_LAUNCH_POS);
+//                inLaunchPos = !inLaunchPos;
+//                isBchanged = true;
+//            } else if (!gamepad1.b) {
+//                isBchanged = false;
+//            }
 
             if(gamepad1.y && !isYchanged){   //changes value of isRoofRaised
                 isYchanged = true;
