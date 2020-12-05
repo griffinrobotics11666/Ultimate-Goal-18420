@@ -61,6 +61,7 @@ public class HardwareRobot
     public Servo clawServo;
     public Servo clawRotationServo;
     public Servo shootyBoi;
+    public Servo shootyRotaion;
 
     //define buttons
     public DigitalChannel touchyKid = null;
@@ -94,7 +95,7 @@ public class HardwareRobot
         rearRightDrive = hwMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
         armMotor = hwMap.get(DcMotor.class, "arm_motor");   //control hub port 2
         shootyMotor = hwMap.get(DcMotor.class, "shooty_motor");   //expansion hub port 2
-        touchyKid = hwMap.get(DigitalChannel.class, "sensor_digital");
+        touchyKid = hwMap.get(DigitalChannel.class, "sensor_digital"); //control hub digital device port 0
 
         //sets init direction for drive motors
         rearLeftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -127,11 +128,7 @@ public class HardwareRobot
         clawServo = hwMap.get(Servo.class, "claw_grip_servo");    //Control Hub Port 0
         clawRotationServo = hwMap.get(Servo.class, "claw_rotation_servo");  //Control Hub Port 1
         shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Expansion Hub Port 1
-
-        //sets init position for servos
-        clawServo.setPosition(0.35);
-        clawRotationServo.setPosition(0.35);
-        shootyBoi.setPosition(0.5);
+        shootyRotaion = hwMap.get(Servo.class, "shooty_rotation_servo");    //Expansion Hub port 2
         
         //init hardware variables for color & distance sensors
        // colorSensor = hwMap.get(ColorSensor.class, "color_distance_sensor");
