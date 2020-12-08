@@ -170,12 +170,12 @@ public class DriverControl extends OpMode {
             }
 
             if(gamepad1.dpad_left) {
-                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() - 0.01);
+                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() - 0.005);
                 if(robot.shootyRotaion.getPosition() < 0){
                     robot.shootyRotaion.setPosition(0);
                 }
             } else if(gamepad1.dpad_right) {
-                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() + 0.01);
+                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() + 0.005);
                 if(robot.shootyRotaion.getPosition() > 1){
                     robot.shootyRotaion.setPosition(1);
                 }
