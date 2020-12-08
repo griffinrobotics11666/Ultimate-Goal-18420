@@ -89,18 +89,10 @@ public class AutonomousTest extends LinearOpMode {
         robot.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         robot.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
-        // Step through each leg of the path,
-        // Note: Reverse movement is obtairobot by setting a negative distance (not speed)
-        //timeout is a failsafe to stop all motors if it takes too long
-//        encoderDrive(DRIVE_SPEED, 36, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
-        turn(-90, .5);
+        encoderDrive(DRIVE_SPEED, 24, 30);
         sleep(500);
-        turn(90, .5);
-//        encoderDrive(DRIVE_SPEED, -36, 10.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-//        turn(90, .5);
-//        sleep(500);
-//        turn(90, .5);
 
+        turn(-90, TURN_SPEED);
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
