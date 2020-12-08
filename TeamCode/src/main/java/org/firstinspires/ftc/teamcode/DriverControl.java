@@ -67,11 +67,14 @@ public class DriverControl extends OpMode {
     //set up variables for the button presses
     boolean debug = false, debugChanged = false;
     boolean inPickupPos = true, isXchanged;
-    boolean inLaunchPos = false, isBchanged;
+    int shootyRotationCount = 0;
+    boolean isUpChanged, isDownChanged;
     boolean isOpen = true, isOpenChanged = false;
     boolean isRoofRaised = true, isYchanged= false; // true: arm is up, false: arm is down
     boolean shootyIsRunning = false, shootyIsRunningChanged = false;
     boolean isShooting = false, shootyIsShootingChanged = false;
+
+    double motorPower = 0;
 
     // Setup a variable for each drive wheel to save power level for telemetry
     double rearLeftPower;
@@ -83,8 +86,9 @@ public class DriverControl extends OpMode {
     private static final double CLAW_SERVO_OPEN_POS     =  0.35;
     private static final double CLAW_SERVO_CLOSE_POS     =  0.55;
 
-    private static final double SHOOTY_ROTATION_LAUNCH_POS     =  0;//todo
     private static final double SHOOTY_ROTATION_FLAT_POS     =  0.64;
+    private static final double SHOOTY_ROTATION_LAUNCH_LOW     =  0;//todo
+    private static final double SHOOTY_ROTATION_LAUNCH_HIGH = 0;
 
     private static final double CLAW_ROTATION_SERVO_PICKUP     =  0.35;
     private static final double CLAW_ROTATION_SERVO_DROP     =  0.49;
@@ -180,15 +184,42 @@ public class DriverControl extends OpMode {
                     robot.shootyRotaion.setPosition(1);
                 }
             }
-            telemetry.addData("Shooty Rotation servo Position: ", "%5.2f", robot.shootyRotaion.getPosition());
 
-//            if(gamepad1.b && !isBchanged){   //toggles position of shooty rotation servo
-//                robot.shootyRotaion.setPosition(inLaunchPos ? SHOOTY_ROTATION_FLAT_POS : SHOOTY_ROTATION_LAUNCH_POS);
-//                inLaunchPos = !inLaunchPos;
-//                isBchanged = true;
-//            } else if (!gamepad1.b) {
-//                isBchanged = false;
+//            if(gamepad1.dpad_up && !isUpChanged){   //toggles position of shooty rotation servo UP
+//                shootyRotationCount++;
+//                if(shootyRotationCount > 2){
+//                    shootyRotationCount = 2;
+//                }
+//                robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_LAUNCH_HIGH);
+//                isUpChanged = true;
+//            } else if (!gamepad1.dpad_up) {
+//                isUpChanged = false;
 //            }
+//
+//            if(gamepad1.dpad_down && !isDownChanged){   //toggles position of shooty rotation servo DOWN
+//                shootyRotationCount--;
+//                if(shootyRotationCount < 0){
+//                    shootyRotationCount = 0;
+//                }
+//                robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_FLAT_POS);
+//                isDownChanged = true;
+//            } else if (!gamepad1.dpad_down) {
+//                isDownChanged = false;
+//            }
+
+            if(gamepad1.dpad_up){
+                motorPower += 0.01;
+                if(motorPower >1){
+                    motorPower =1;
+                }
+                robot.shootyMotor.setPower(motorPower);
+            } else if (gamepad1.dpad_down){
+                motorPower -= 0.01;
+                if(motorPower < 0){
+                    motorPower =0;
+                }
+                robot.shootyMotor.setPower(motorPower);
+            }
 
             if(gamepad1.y && !isYchanged){   //changes value of isRoofRaised
                 isYchanged = true;
@@ -230,13 +261,13 @@ public class DriverControl extends OpMode {
                 shootyIsShootingChanged = false;
             }
 
-            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
-                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.75);
-                shootyIsRunning = !shootyIsRunning;
-                shootyIsRunningChanged = true;
-            } else if (!gamepad1.start) {
-                shootyIsRunningChanged = false;
-            }
+//            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+//                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.75);
+//                shootyIsRunning = !shootyIsRunning;
+//                shootyIsRunningChanged = true;
+//            } else if (!gamepad1.start) {
+//                shootyIsRunningChanged = false;
+//            }
 
             //left stick
             double drive  =  gamepad1.left_stick_y;
@@ -269,10 +300,9 @@ public class DriverControl extends OpMode {
             telemetry.addData("Is arm motor busy", ""  + robot.armMotor.isBusy());
             telemetry.addData("Arm Motor Encoder Position", robot.armMotor.getCurrentPosition());
             telemetry.addData("Is Touching sensor", ": " + !robot.touchyKid.getState());
-
+            telemetry.addData("Shooty Rotation servo Position: ", "%5.2f", robot.shootyRotaion.getPosition());
+            telemetry.addData("motorPower: " , "" + motorPower);
             telemetry.update();
-
-
 
         } else {    //runs if debug = true
             telemetry.addData("Debug mode: " ,"enabled.");
@@ -329,13 +359,13 @@ public class DriverControl extends OpMode {
             telemetry.addData("Arm Motor ", "Position: %7d", robot.armMotor.getCurrentPosition());
             telemetry.addData("touchyKid", robot.touchyKid.getState());
 
-            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
-                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.75);
-                shootyIsRunning = !shootyIsRunning;
-                shootyIsRunningChanged = true;
-            } else if (!gamepad1.start) {
-                shootyIsRunningChanged = false;
-            }
+//            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+//                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.75);
+//                shootyIsRunning = !shootyIsRunning;
+//                shootyIsRunningChanged = true;
+//            } else if (!gamepad1.start) {
+//                shootyIsRunningChanged = false;
+//            }
 
             if(gamepad1.back && !debugChanged){   //toggles debug
                 debug = false;
