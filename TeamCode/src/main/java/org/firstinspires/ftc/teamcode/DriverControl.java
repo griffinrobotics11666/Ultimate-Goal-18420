@@ -87,8 +87,8 @@ public class DriverControl extends OpMode {
     private static final double CLAW_SERVO_CLOSE_POS     =  0.55;
 
     private static final double SHOOTY_ROTATION_FLAT_POS     =  0.64;
-    private static final double SHOOTY_ROTATION_LAUNCH_LOW     =  0;//todo
-    private static final double SHOOTY_ROTATION_LAUNCH_HIGH = 0;
+    private static final double SHOOTY_ROTATION_LAUNCH_LOW     =  0.19;
+    private static final double SHOOTY_ROTATION_LAUNCH_HIGH = 0.11;
 
     private static final double CLAW_ROTATION_SERVO_PICKUP     =  0.35;
     private static final double CLAW_ROTATION_SERVO_DROP     =  0.49;
@@ -173,39 +173,39 @@ public class DriverControl extends OpMode {
                 isOpenChanged = false;
             }
 
-            if(gamepad1.dpad_left) {
-                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() - 0.005);
-                if(robot.shootyRotaion.getPosition() < 0){
-                    robot.shootyRotaion.setPosition(0);
+//            if(gamepad1.dpad_left) {
+//                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() - 0.005);
+//                if(robot.shootyRotaion.getPosition() < 0){
+//                    robot.shootyRotaion.setPosition(0);
+//                }
+//            } else if(gamepad1.dpad_right) {
+//                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() + 0.005);
+//                if(robot.shootyRotaion.getPosition() > 1){
+//                    robot.shootyRotaion.setPosition(1);
+//                }
+//            }
+
+            if(gamepad1.dpad_up && !isUpChanged){   //toggles position of shooty rotation servo UP
+                shootyRotationCount++;
+                if(shootyRotationCount > 2){
+                    shootyRotationCount = 2;
                 }
-            } else if(gamepad1.dpad_right) {
-                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() + 0.005);
-                if(robot.shootyRotaion.getPosition() > 1){
-                    robot.shootyRotaion.setPosition(1);
-                }
+                robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_LAUNCH_HIGH);
+                isUpChanged = true;
+            } else if (!gamepad1.dpad_up) {
+                isUpChanged = false;
             }
 
-//            if(gamepad1.dpad_up && !isUpChanged){   //toggles position of shooty rotation servo UP
-//                shootyRotationCount++;
-//                if(shootyRotationCount > 2){
-//                    shootyRotationCount = 2;
-//                }
-//                robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_LAUNCH_HIGH);
-//                isUpChanged = true;
-//            } else if (!gamepad1.dpad_up) {
-//                isUpChanged = false;
-//            }
-//
-//            if(gamepad1.dpad_down && !isDownChanged){   //toggles position of shooty rotation servo DOWN
-//                shootyRotationCount--;
-//                if(shootyRotationCount < 0){
-//                    shootyRotationCount = 0;
-//                }
-//                robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_FLAT_POS);
-//                isDownChanged = true;
-//            } else if (!gamepad1.dpad_down) {
-//                isDownChanged = false;
-//            }
+            if(gamepad1.dpad_down && !isDownChanged){   //toggles position of shooty rotation servo DOWN
+                shootyRotationCount--;
+                if(shootyRotationCount < 0){
+                    shootyRotationCount = 0;
+                }
+                robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_FLAT_POS);
+                isDownChanged = true;
+            } else if (!gamepad1.dpad_down) {
+                isDownChanged = false;
+            }
 
 //            if(gamepad1.dpad_up){ //to manually adjust value of shooty motor speed
 //                motorPower += 0.01;

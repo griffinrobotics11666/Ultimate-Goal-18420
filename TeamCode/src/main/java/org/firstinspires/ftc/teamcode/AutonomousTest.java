@@ -90,9 +90,6 @@ public class AutonomousTest extends LinearOpMode {
         robot.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         encoderDrive(DRIVE_SPEED, 24, 30);
-        sleep(500);
-
-        turn(-90, TURN_SPEED);
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
