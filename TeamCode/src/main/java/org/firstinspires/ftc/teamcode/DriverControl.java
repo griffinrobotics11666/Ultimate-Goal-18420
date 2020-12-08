@@ -207,19 +207,19 @@ public class DriverControl extends OpMode {
 //                isDownChanged = false;
 //            }
 
-            if(gamepad1.dpad_up){
-                motorPower += 0.01;
-                if(motorPower >1){
-                    motorPower =1;
-                }
-                robot.shootyMotor.setPower(motorPower);
-            } else if (gamepad1.dpad_down){
-                motorPower -= 0.01;
-                if(motorPower < 0){
-                    motorPower =0;
-                }
-                robot.shootyMotor.setPower(motorPower);
-            }
+//            if(gamepad1.dpad_up){ //to manually adjust value of shooty motor speed
+//                motorPower += 0.01;
+//                if(motorPower >1){
+//                    motorPower = 1;
+//                }
+//                robot.shootyMotor.setPower(motorPower);
+//            } else if (gamepad1.dpad_down){
+//                motorPower -= 0.01;
+//                if(motorPower < 0){
+//                    motorPower = 0;
+//                }
+//                robot.shootyMotor.setPower(motorPower);
+//            }
 
             if(gamepad1.y && !isYchanged){   //changes value of isRoofRaised
                 isYchanged = true;
@@ -261,13 +261,13 @@ public class DriverControl extends OpMode {
                 shootyIsShootingChanged = false;
             }
 
-//            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
-//                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.75);
-//                shootyIsRunning = !shootyIsRunning;
-//                shootyIsRunningChanged = true;
-//            } else if (!gamepad1.start) {
-//                shootyIsRunningChanged = false;
-//            }
+            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.59);
+                shootyIsRunning = !shootyIsRunning;
+                shootyIsRunningChanged = true;
+            } else if (!gamepad1.start) {
+                shootyIsRunningChanged = false;
+            }
 
             //left stick
             double drive  =  gamepad1.left_stick_y;
@@ -359,13 +359,13 @@ public class DriverControl extends OpMode {
             telemetry.addData("Arm Motor ", "Position: %7d", robot.armMotor.getCurrentPosition());
             telemetry.addData("touchyKid", robot.touchyKid.getState());
 
-//            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
-//                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.75);
-//                shootyIsRunning = !shootyIsRunning;
-//                shootyIsRunningChanged = true;
-//            } else if (!gamepad1.start) {
-//                shootyIsRunningChanged = false;
-//            }
+            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.59);
+                shootyIsRunning = !shootyIsRunning;
+                shootyIsRunningChanged = true;
+            } else if (!gamepad1.start) {
+                shootyIsRunningChanged = false;
+            }
 
             if(gamepad1.back && !debugChanged){   //toggles debug
                 debug = false;
