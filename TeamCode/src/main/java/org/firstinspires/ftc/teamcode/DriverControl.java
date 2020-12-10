@@ -247,7 +247,7 @@ public class DriverControl extends OpMode {
             }
 
 
-            if(gamepad1.right_bumper && !shootyIsShootingChanged){   //toggles open and close of claw servo
+            if(gamepad1.right_bumper && !shootyIsShootingChanged){   //shoots disc
                 robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_SHOOT_POS);
                 double pressTime = runtime.milliseconds();
                 while(runtime.milliseconds()-pressTime < 250){  //wait until the shooty servo has fully moves forward.
@@ -270,7 +270,7 @@ public class DriverControl extends OpMode {
             }
 
             //left stick
-            double drive  =  gamepad1.left_stick_y;
+            double drive  =  gamepad1.left_stick_y; //note: for the future, the Y direction should be negated and not the x direction
             double strafe = -gamepad1.left_stick_x;
             //right stick
             double turn = -gamepad1.right_stick_x;

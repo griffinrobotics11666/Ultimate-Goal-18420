@@ -54,6 +54,12 @@ public class AutonomousTest extends LinearOpMode {
     Orientation angleExpansion;
     Orientation angleControl;
 
+    boolean isRoofRaised = true;
+    private static final double SHOOTY_BOI_SERVO_SHOOT_POS     =  0.64;
+    private static final double SHOOTY_BOI_SERVO_LOAD_POS     =  0.47;
+    private static final double SHOOTY_ROTATION_FLAT_POS     =  0.64;
+    private static final double SHOOTY_ROTATION_LAUNCH_LOW     =  0.19;
+
 
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -90,6 +96,75 @@ public class AutonomousTest extends LinearOpMode {
         robot.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         encoderDrive(DRIVE_SPEED, 24, 30);
+
+        if(isRoofRaised) {   //MOVE ARM MOTOR DOWN
+            if (!robot.touchyKid.getState()) {   //checks if limit switch is closed
+                robot.armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                robot.armMotor.setTargetPosition(5375);
+                robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.armMotor.setPower(1);
+                if (robot.armMotor.getCurrentPosition() >= 5375) {
+                    robot.armMotor.setPower(0.0);
+                }
+            }
+        }
+
+        robot.shootyMotor.setPower(0.59);       //turn on the shooty motor
+        robot.shootyRotaion.setPosition(SHOOTY_ROTATION_LAUNCH_LOW);
+
+        turn(-10, TURN_SPEED);
+        sleep(500);
+
+
+        //SHOOT ONCE
+        robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_SHOOT_POS);
+        double pressTime = runtime.milliseconds();
+        while(runtime.milliseconds()-pressTime < 250){  //wait until the shooty servo has fully moves forward.
+            telemetry.addData("Wait " ,"true");
+            telemetry.update();
+        }
+        robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
+         sleep(500);
+        turn(-10, TURN_SPEED);
+        sleep(500);
+
+
+        //SHOOT TWICE
+        robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_SHOOT_POS);
+        pressTime = runtime.milliseconds();
+        while(runtime.milliseconds()-pressTime < 250){  //wait until the shooty servo has fully moves forward.
+            telemetry.addData("Wait " ,"true");
+            telemetry.update();
+        }
+        robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
+        sleep(500);
+        turn(-10, TURN_SPEED);
+        sleep(500);
+
+
+        //SHOOT THRICE
+        robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_SHOOT_POS);
+        pressTime = runtime.milliseconds();
+        while(runtime.milliseconds()-pressTime < 250){  //wait until the shooty servo has fully moves forward.
+            telemetry.addData("Wait " ,"true");
+            telemetry.update();
+        }
+        robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
+        sleep(500);
+
+
+        turn(30, TURN_SPEED);
+        sleep(250);
+        robot.shootyBoi.setPosition(SHOOTY_ROTATION_FLAT_POS);
+        robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        robot.armMotor.setTargetPosition(0);
+        robot.armMotor.setPower(1);
+        if(!robot.touchyKid.getState()){
+            robot.armMotor.setPower(0.0);
+        }
+
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
