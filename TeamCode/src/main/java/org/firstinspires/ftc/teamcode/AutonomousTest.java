@@ -136,7 +136,7 @@ public class AutonomousTest extends LinearOpMode {
             robot.rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // calculate target positions
-            encoderTarget = robot.frontLeftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            encoderTarget = robot.frontLeftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH * -1);
 
             //set target positions for motors
             robot.frontLeftDrive.setTargetPosition(encoderTarget);
