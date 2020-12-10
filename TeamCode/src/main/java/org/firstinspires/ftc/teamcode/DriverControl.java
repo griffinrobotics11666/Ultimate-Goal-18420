@@ -226,10 +226,10 @@ public class DriverControl extends OpMode {
                 if(isRoofRaised){   //MOVE ARM MOTOR DOWN
                     if(!robot.touchyKid.getState()) {   //checks if limit switch is closed
                         robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                        robot.armMotor.setTargetPosition(5562);
+                        robot.armMotor.setTargetPosition(5068);
                         robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         robot.armMotor.setPower(1);
-                        if (robot.armMotor.getCurrentPosition() >= 5562) {
+                        if (robot.armMotor.getCurrentPosition() >= 5068) {
                             robot.armMotor.setPower(0.0);
                         }
                     }

@@ -159,8 +159,7 @@ public class AutonomousTest extends LinearOpMode {
 
 
             //if one of these is false, the loop will exit and will continue to set power for all wheels to 0
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.frontLeftDrive.isBusy() && robot.frontRightDrive.isBusy()
-                    && robot.rearLeftDrive.isBusy() && robot.rearRightDrive.isBusy()) {
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.frontLeftDrive.isBusy() && robot.frontRightDrive.isBusy() && robot.rearLeftDrive.isBusy() && robot.rearRightDrive.isBusy()) {
 
                 if(robot.frontLeftDrive.getCurrentPosition() < encoderTarget/2){   //accelerate in the positive direction
                     currentSpeed += 0.01;
