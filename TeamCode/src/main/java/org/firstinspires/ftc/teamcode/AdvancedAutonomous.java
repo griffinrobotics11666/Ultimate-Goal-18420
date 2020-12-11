@@ -1,0 +1,318 @@
+/* Copyright (c) 2017 FIRST. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted (subject to the limitations in the disclaimer below) provided that
+ * the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this list
+ * of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * Neither the name of FIRST nor the names of its contributors may be used to endorse or
+ * promote products derived from this software without specific prior written permission.
+ *
+ * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+ * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+
+@Autonomous(name="Advanced Autonomous", group="Linear Opmode")
+//@Disabled
+public class AdvancedAutonomous extends LinearOpMode {
+    HardwareRobot robot = new HardwareRobot();
+
+    Orientation angleExpansion;
+    Orientation angleControl;
+
+    boolean isRoofRaised = true;
+    private static final double SHOOTY_BOI_SERVO_SHOOT_POS     =  0.64;
+    private static final double SHOOTY_BOI_SERVO_LOAD_POS     =  0.47;
+    private static final double SHOOTY_ROTATION_FLAT_POS     =  0.64;
+    private static final double SHOOTY_ROTATION_LAUNCH_LOW     =  0.19;
+
+
+
+    private ElapsedTime runtime = new ElapsedTime();
+
+    static final double COUNTS_PER_MOTOR_REV = 537.6;    // encoder counts per revolution
+    static final double DRIVE_GEAR_REDUCTION = 2.0;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double DRIVE_SPEED = 0.6;
+    static final double TURN_SPEED = 0.5;
+
+
+    @Override
+    public void runOpMode() {
+        robot.init(hardwareMap);
+
+        telemetry.addData("Status", "Ready");
+        telemetry.update();
+
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+
+        //gyro stuff for turn()
+        robot.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        robot.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+
+        encoderDrive(DRIVE_SPEED, 24, 30);      //moves the robot forward 24 inches todo change this to the distance we want it to move forward when shooting
+
+        if (!robot.touchyKid.getState()) {   //checks if limit switch is closed - basically a safety. WILL NOT RUN if arm does not start fully up
+
+            //lowers arm
+            robot.armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.armMotor.setTargetPosition(5375);
+            robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.armMotor.setPower(1);
+            if (robot.armMotor.getCurrentPosition() >= 5375) {
+                robot.armMotor.setPower(0.0);
+            }
+
+            robot.shootyMotor.setPower(0.59);       //turn on the shooty motor
+
+            robot.shootyRotaion.setPosition(SHOOTY_ROTATION_LAUNCH_LOW);    //sets the shooting platform to the lower angle
+
+            turn(-10, TURN_SPEED);  //turns left (make positive if turns right) 10 degrees todo test this with different values to find the best one to hit the first target
+            sleep(250); //small delay so things dont happen too quickly, adjust time and add/remove more if needed
+
+            //SHOOT ONCE
+            shoot();    //see method below
+            sleep(250);
+
+            turn(-10, TURN_SPEED);  //turns again to hit the second target todo also determine angle
+            sleep(250);
+
+            //SHOOT TWICE
+            shoot();
+            sleep(250);
+
+            turn(-10, TURN_SPEED);      //turns again
+            sleep(250);
+
+            //SHOOT THRICE
+            shoot();
+            sleep(500);
+
+            turn(30, TURN_SPEED);   //rotates the bot back to its original angle TODO must rotate the same TOTAL amount as above, but the opposite direction
+            sleep(250);
+
+            robot.shootyBoi.setPosition(SHOOTY_ROTATION_FLAT_POS);      //returns the shooting platform to its normal flat position
+
+            robot.shootyMotor.setPower(0.59);       //turn off the shooty motor
+
+            //moves the arm motor back up
+            robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.armMotor.setTargetPosition(0);
+            robot.armMotor.setPower(1);
+            if (!robot.touchyKid.getState()) {
+                robot.armMotor.setPower(0.0);
+            }
+        }
+
+        encoderDrive(DRIVE_SPEED, -24, 30);     //moves the robot back 24in to its original location todo must be the same as above
+
+        telemetry.addData("Path", "Complete");
+        telemetry.update();
+
+    }
+
+
+
+
+
+
+    /*
+     *  Method to perform a relative move, based on encoder counts.
+     *  Encoders are not reset as the move is based on the current position.
+     *  Move will stop if any of three conditions occur:
+     *  1) Move gets to the desired position
+     *  2) Move runs out of time
+     *  3) Driver stops the opmode running.
+     */
+
+    public void encoderDrive(double speed, double inches, double timeoutS) {
+        int encoderTarget;
+
+
+        double currentSpeed = 0.2;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+            //the motors will come to a hard stop instead of coasting
+            robot.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            robot.frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            robot.rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            robot.rearRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //Reset Encoders
+
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            // calculate target positions
+            encoderTarget = robot.frontLeftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH * -1);
+
+            //set target positions for motors
+            robot.frontLeftDrive.setTargetPosition(encoderTarget);
+            robot.frontRightDrive.setTargetPosition(encoderTarget);
+            robot.rearLeftDrive.setTargetPosition(encoderTarget);
+            robot.rearRightDrive.setTargetPosition(encoderTarget);
+
+            // Turn On RUN_TO_POSITION
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            robot.frontLeftDrive.setPower(currentSpeed);
+            robot.frontRightDrive.setPower(currentSpeed);
+            robot.rearLeftDrive.setPower(currentSpeed);
+            robot.rearRightDrive.setPower(currentSpeed);
+
+
+            //if one of these is false, the loop will exit and will continue to set power for all wheels to 0
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.frontLeftDrive.isBusy() && robot.frontRightDrive.isBusy() && robot.rearLeftDrive.isBusy() && robot.rearRightDrive.isBusy()) {
+
+                if(robot.frontLeftDrive.getCurrentPosition() < encoderTarget/2){   //accelerate in the positive direction
+                    currentSpeed += 0.01;
+                    telemetry.addData("accelerating", "positive");
+                } else if (robot.frontLeftDrive.getCurrentPosition() > encoderTarget/2){    //accelerate in the negative direction
+                    currentSpeed -= 0.01;
+                    telemetry.addData("accelerating", "negative");
+                }
+
+                robot.frontLeftDrive.setPower(currentSpeed);
+                robot.frontRightDrive.setPower(currentSpeed);
+                robot.rearLeftDrive.setPower(currentSpeed);
+                robot.rearRightDrive.setPower(currentSpeed);
+                telemetry.addData("Current Speed", currentSpeed);
+                // Display it for the driver.
+                telemetry.addData("Path1", "Running to %7d", encoderTarget);
+                telemetry.addData("Path2", "Running at %7d", robot.frontLeftDrive.getCurrentPosition());
+                telemetry.update();
+            }
+
+
+            // Stop all motion;
+            robot.frontLeftDrive.setPower(0);
+            robot.frontRightDrive.setPower(0);
+            robot.rearLeftDrive.setPower(0);
+            robot.rearRightDrive.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            sleep(250);   // optional pause after each move
+        }
+    }
+
+    public void shoot(){    //code taken from driver control
+        robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_SHOOT_POS);
+        double pressTime = runtime.milliseconds();
+        while(runtime.milliseconds()-pressTime < 250){  //wait until the shooty servo has fully moves forward.
+            telemetry.addData("Wait " ,"true");
+            telemetry.update();
+        }
+        robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
+    }
+
+    public void turn(double turnAngle, double speed) {
+        double currentAngle = readDoubleAngle();
+        double lastAngle = currentAngle;
+        double deltaAngle = 0;
+        double totalAngle = 0;
+        if (Math.abs(deltaAngle) >= 180) {
+            deltaAngle = currentAngle + lastAngle;
+        }
+        double increment = .5;
+        double power = 0;
+        while (opModeIsActive() && Math.abs(turnAngle - totalAngle) > .1) {
+            deltaAngle = currentAngle - lastAngle;
+            totalAngle += deltaAngle;
+            currentAngle = readDoubleAngle();
+            power += increment;
+
+            if (power > speed){
+                power = speed;
+            }
+            else if (power < (-1)){
+                power = -1;
+            }
+            if (turnAngle > 0){
+                robot.frontLeftDrive.setPower(-power);
+                robot.frontRightDrive.setPower(power);
+                robot.rearLeftDrive.setPower(-power);
+                robot.rearRightDrive.setPower(power);
+            } else {
+                robot.frontLeftDrive.setPower(power);
+                robot.frontRightDrive.setPower(-power);
+                robot.rearLeftDrive.setPower(power);
+                robot.rearRightDrive.setPower(-power);
+            }
+
+            if(Math.abs(totalAngle) > Math.abs(turnAngle)){
+                increment = increment * (-0.5);
+            }
+        }
+        robot.frontLeftDrive.setPower (0);
+        robot.frontRightDrive.setPower(0);
+        robot.rearLeftDrive.setPower(0);
+        robot.rearRightDrive.setPower(0);
+
+    }
+
+
+    public String readAngle() {
+        angleControl = robot.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angleExpansion = robot.imuExpansion.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return "Expansion: " + String.valueOf(angleExpansion.firstAngle) + "\nAngle: Control: " + String.valueOf(angleControl.firstAngle);
+    }
+
+    public double readDoubleAngle() {
+        angleControl = robot.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return angleControl.firstAngle;
+    }
+}
