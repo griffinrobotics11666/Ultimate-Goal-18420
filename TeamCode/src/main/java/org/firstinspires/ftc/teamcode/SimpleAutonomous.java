@@ -78,7 +78,7 @@ public class SimpleAutonomous extends LinearOpMode {
         robot.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         robot.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
-        encoderDrive(DRIVE_SPEED, 24, 30);      //moves the robot forward 24 inches todo change this to the distance we want it to move forward
+        encoderDrive(DRIVE_SPEED, 72, 30);      //moves the robot forward 24 inches todo change this to the distance we want it to move forward
     }
 
 
