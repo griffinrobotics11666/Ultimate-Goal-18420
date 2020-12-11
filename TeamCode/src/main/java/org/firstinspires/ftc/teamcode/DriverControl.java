@@ -383,6 +383,15 @@ public class DriverControl extends OpMode {
      */
     @Override
     public void stop() {
+        //TODO uncomment this section if you guys want the robot to automatically raise the arm when it turns off so we dont have to deal with manually moving it & ensure it starts upright
+//        if(!isRoofRaised){   //MOVE ARM MOTOR UP
+//            robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            robot.armMotor.setTargetPosition(0);
+//            robot.armMotor.setPower(1);
+//            if(!robot.touchyKid.getState()){
+//                robot.armMotor.setPower(0.0);
+//            }
+//        }
     }
 
 
