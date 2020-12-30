@@ -38,8 +38,13 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
-
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 
 /**
@@ -60,6 +65,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 //@Disabled
 public class DriverControl extends OpMode {
     HardwareRobot robot = new HardwareRobot();
+
+    Orientation angleExpansion;
+    Orientation angleControl;
 
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -105,6 +113,10 @@ public class DriverControl extends OpMode {
     @Override
     public void init() {
         robot.init(hardwareMap);
+
+        robot.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        robot.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+
         //set DC Motor drive modes
         robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -358,7 +370,7 @@ public class DriverControl extends OpMode {
             }
             telemetry.addData("Arm Motor ", "Position: %7d", robot.armMotor.getCurrentPosition());
             telemetry.addData("touchyKid", robot.touchyKid.getState());
-
+            telemetry.addData("Current Angle", readDoubleAngle());
             if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
                 robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.59);
                 shootyIsRunning = !shootyIsRunning;
@@ -375,6 +387,17 @@ public class DriverControl extends OpMode {
             }
             telemetry.update();
         }
+    }
+
+    public String readAngle() {
+        angleControl = robot.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angleExpansion = robot.imuExpansion.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return "Expansion: " + String.valueOf(angleExpansion.firstAngle) + "\nAngle: Control: " + String.valueOf(angleControl.firstAngle);
+    }
+
+    public double readDoubleAngle() {
+        angleControl = robot.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return angleControl.firstAngle;
     }
 
 

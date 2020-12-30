@@ -59,6 +59,9 @@ public class AdvancedAutonomous extends LinearOpMode {
     private static final double SHOOTY_BOI_SERVO_LOAD_POS     =  0.47;
     private static final double SHOOTY_ROTATION_FLAT_POS     =  0.64;
     private static final double SHOOTY_ROTATION_LAUNCH_LOW     =  0.19;
+    private static final double SHOOTY_ROTATION_LAUNCH_HIGH = 0.11;
+    private static final double CLAW_ROTATION_SERVO_PICKUP     =  0.35;
+    private static final double CLAW_ROTATION_SERVO_DROP     =  0.49;
 
 
 
@@ -78,7 +81,7 @@ public class AdvancedAutonomous extends LinearOpMode {
 
         telemetry.addData("Status", "Ready");
         telemetry.update();
-
+        robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_PICKUP);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
@@ -86,7 +89,7 @@ public class AdvancedAutonomous extends LinearOpMode {
         robot.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         robot.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
-        encoderDrive(DRIVE_SPEED, 24, 30);      //moves the robot forward 24 inches todo change this to the distance we want it to move forward when shooting
+        encoderDrive(DRIVE_SPEED, 45, 30);      //moves the robot forward 24 inches todo change this to the distance we want it to move forward when shooting
 
         if (!robot.touchyKid.getState()) {   //checks if limit switch is closed - basically a safety. WILL NOT RUN if arm does not start fully up
 
@@ -102,33 +105,34 @@ public class AdvancedAutonomous extends LinearOpMode {
 
             robot.shootyMotor.setPower(0.59);       //turn on the shooty motor
 
-            robot.shootyRotaion.setPosition(SHOOTY_ROTATION_LAUNCH_LOW);    //sets the shooting platform to the lower angle
+            robot.shootyRotaion.setPosition(SHOOTY_ROTATION_LAUNCH_HIGH + .02);    //sets the shooting platform to the lower angle
 
-            turn(-10, TURN_SPEED);  //turns left (make positive if turns right) 10 degrees todo test this with different values to find the best one to hit the first target
-            sleep(250); //small delay so things dont happen too quickly, adjust time and add/remove more if needed
+            turn(-3, TURN_SPEED);  //turns left (make positive if turns right) 10 degrees todo test this with different values to find the best one to hit the first target
+            sleep(3000); //small delay so things dont happen too quickly, adjust time and add/remove more if needed
 
             //SHOOT ONCE
             shoot();    //see method below
-            sleep(250);
+            sleep(1500);
 
-            turn(-10, TURN_SPEED);  //turns again to hit the second target todo also determine angle
-            sleep(250);
+            //turn(-10, TURN_SPEED);  //turns again to hit the second target todo also determine angle
+            //sleep(250);
 
             //SHOOT TWICE
             shoot();
-            sleep(250);
+            sleep(1500);
 
-            turn(-10, TURN_SPEED);      //turns again
-            sleep(250);
+            //turn(-10, TURN_SPEED);      //turns again
+            //sleep(250);
 
             //SHOOT THRICE
             shoot();
-            sleep(500);
+            sleep(1500);
 
-            turn(30, TURN_SPEED);   //rotates the bot back to its original angle TODO must rotate the same TOTAL amount as above, but the opposite direction
-            sleep(250);
+            turn(-2, TURN_SPEED);   //rotates the bot back to its original angle TODO must rotate the same TOTAL amount as above, but the opposite direction
+            sleep(1500);
 
-            robot.shootyBoi.setPosition(SHOOTY_ROTATION_FLAT_POS);      //returns the shooting platform to its normal flat position
+            robot.shootyBoi.setPosition(SHOOTY_ROTATION_FLAT_POS); //returns the shooting platform to its normal flat position
+            robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_PICKUP);
 
             robot.shootyMotor.setPower(0.59);       //turn off the shooty motor
 
@@ -139,9 +143,10 @@ public class AdvancedAutonomous extends LinearOpMode {
             if (!robot.touchyKid.getState()) {
                 robot.armMotor.setPower(0.0);
             }
+            robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
         }
 
-        encoderDrive(DRIVE_SPEED, -24, 30);     //moves the robot back 24in to its original location todo must be the same as above
+        encoderDrive(DRIVE_SPEED, 30, 30);     //moves the robot back 24in to its original location todo must be the same as above
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
@@ -267,35 +272,44 @@ public class AdvancedAutonomous extends LinearOpMode {
         if (Math.abs(deltaAngle) >= 180) {
             deltaAngle = currentAngle + lastAngle;
         }
-        double increment = .5;
-        double power = 0;
+        double increment = .001;
+        double power = 0.1;
         while (opModeIsActive() && Math.abs(turnAngle - totalAngle) > .1) {
+            currentAngle = readDoubleAngle();
             deltaAngle = currentAngle - lastAngle;
             totalAngle += deltaAngle;
-            currentAngle = readDoubleAngle();
+            //missing changing lastAngle
+            lastAngle = currentAngle;
             power += increment;
+
+            if (Math.abs(turnAngle - totalAngle) < 20) {
+                increment = Math.abs(increment) * -1;
+            }
 
             if (power > speed){
                 power = speed;
             }
-            else if (power < (-1)){
-                power = -1;
+            else if (power < .1){
+                power = .1;
             }
-            if (turnAngle > 0){
-                robot.frontLeftDrive.setPower(-power);
-                robot.frontRightDrive.setPower(power);
-                robot.rearLeftDrive.setPower(-power);
-                robot.rearRightDrive.setPower(power);
-            } else {
+            if (turnAngle-totalAngle > 0){
                 robot.frontLeftDrive.setPower(power);
                 robot.frontRightDrive.setPower(-power);
                 robot.rearLeftDrive.setPower(power);
                 robot.rearRightDrive.setPower(-power);
+            } else {
+                robot.frontLeftDrive.setPower(-power);
+                robot.frontRightDrive.setPower(power);
+                robot.rearLeftDrive.setPower(-power);
+                robot.rearRightDrive.setPower(power);
             }
+            telemetry.addData("total angle", totalAngle);
+            telemetry.addData("delta angle", deltaAngle);
+            telemetry.addData("last angle", lastAngle);
+            telemetry.addData("current angle", currentAngle);
+            telemetry.update();
 
-            if(Math.abs(totalAngle) > Math.abs(turnAngle)){
-                increment = increment * (-0.5);
-            }
+
         }
         robot.frontLeftDrive.setPower (0);
         robot.frontRightDrive.setPower(0);
