@@ -114,21 +114,15 @@ public class AdvancedAutonomous extends LinearOpMode {
             shoot();    //see method below
             sleep(1500);
 
-            //turn(-10, TURN_SPEED);  //turns again to hit the second target todo also determine angle
-            //sleep(250);
-
             //SHOOT TWICE
             shoot();
             sleep(1500);
-
-            //turn(-10, TURN_SPEED);      //turns again
-            //sleep(250);
 
             //SHOOT THRICE
             shoot();
             sleep(1500);
 
-            turn(-2, TURN_SPEED);   //rotates the bot back to its original angle TODO must rotate the same TOTAL amount as above, but the opposite direction
+            turn(3, TURN_SPEED);   //rotates the bot back to its original angle
             sleep(1500);
 
             robot.shootyBoi.setPosition(SHOOTY_ROTATION_FLAT_POS); //returns the shooting platform to its normal flat position
@@ -146,7 +140,7 @@ public class AdvancedAutonomous extends LinearOpMode {
             robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
         }
 
-        encoderDrive(DRIVE_SPEED, 30, 30);     //moves the robot back 24in to its original location todo must be the same as above
+        encoderDrive(DRIVE_SPEED, 30, 30);
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
