@@ -33,7 +33,6 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -51,7 +50,7 @@ public class HardwareRobot
     public DcMotor rearRightDrive = null;
     public DcMotor frontRightDrive = null;
     public DcMotor frontLeftDrive = null;
-    public DcMotor armMotor = null;
+
     //define servos
     public Servo clawServo;
     public Servo clawRotationServo;
@@ -84,14 +83,13 @@ public class HardwareRobot
         frontLeftDrive  = hwMap.get(DcMotor.class, "front_left_drive");   //Expansion Hub Port 1
         rearRightDrive = hwMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
         frontRightDrive = hwMap.get(DcMotor.class, "front_right_drive");  //Control Hub Port 0
-        armMotor = hwMap.get(DcMotor.class, "arm_motor");
 
         //sets init direction for drive motors
         rearLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         rearRightDrive.setDirection(DcMotor.Direction.FORWARD);
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        armMotor.setDirection(DcMotor.Direction.FORWARD);
+
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
