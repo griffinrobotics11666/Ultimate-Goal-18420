@@ -65,7 +65,7 @@ public class HardwareRobot
     public Servo clawServo;
     public Servo clawRotationServo;
     public Servo shootyBoi;
-    public Servo shootyRotaion;
+    public Servo shootyRotation;
 
     //define buttons
     public DigitalChannel touchyKid = null;
@@ -132,7 +132,7 @@ public class HardwareRobot
         clawServo = hwMap.get(Servo.class, "claw_grip_servo");    //Control Hub Port 0
         clawRotationServo = hwMap.get(Servo.class, "claw_rotation_servo");  //Control Hub Port 1
         shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Expansion Hub Port 1
-        shootyRotaion = hwMap.get(Servo.class, "shooty_rotation_servo");    //Expansion Hub port 2
+        shootyRotation = hwMap.get(Servo.class, "shooty_rotation_servo");    //Expansion Hub port 2
         
         //init hardware variables for color & distance sensors
        // colorSensor = hwMap.get(ColorSensor.class, "color_distance_sensor");

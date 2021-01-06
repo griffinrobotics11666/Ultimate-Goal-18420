@@ -112,7 +112,7 @@ public class AdvancedAutonomous extends LinearOpMode {
 
             robot.shootyMotor.setPower(0.59);       //turn on the shooty motor
 
-            robot.shootyRotaion.setPosition(SHOOTY_ROTATION_LAUNCH_HIGH + .02);    //sets the shooting platform to the lower angle
+            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH_HIGH + .02);    //sets the shooting platform to the lower angle
 
             turn(-3, TURN_SPEED);  //turns left (make positive if turns right) 10 degrees todo test this with different values to find the best one to hit the first target
             sleep(3000); //small delay so things dont happen too quickly, adjust time and add/remove more if needed
@@ -132,11 +132,10 @@ public class AdvancedAutonomous extends LinearOpMode {
             turn(3, TURN_SPEED);   //rotates the bot back to its original angle
             sleep(1500);
 
-            robot.shootyBoi.setPosition(SHOOTY_ROTATION_FLAT_POS); //returns the shooting platform to its normal flat position
             robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_PICKUP);
-            robot.shootyBoi.setPosition(SHOOTY_ROTATION_LAUNCH_LOW);
 
-            robot.shootyMotor.setPower(0.59);       //turn off the shooty motor
+
+            robot.shootyMotor.setPower(0);       //turn off the shooty motor
 
             //moves the arm motor back up
             robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -146,6 +145,7 @@ public class AdvancedAutonomous extends LinearOpMode {
                 robot.armMotor.setPower(0.0);
             }
             robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
+            robot.shootyRotation.setPosition(SHOOTY_ROTATION_FLAT_POS); //returns the shooting platform to its normal flat position
         }
 
         encoderDrive(DRIVE_SPEED, 30, 30);
@@ -264,6 +264,7 @@ public class AdvancedAutonomous extends LinearOpMode {
             telemetry.update();
         }
         robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
+
     }
 
     public void turn(double turnAngle, double speed) {

@@ -133,7 +133,7 @@ public class DriverControl extends OpMode {
         robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
         robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_PICKUP);
         robot.clawServo.setPosition(CLAW_SERVO_OPEN_POS);
-        robot.shootyRotaion.setPosition(SHOOTY_ROTATION_FLAT_POS);
+        robot.shootyRotation.setPosition(SHOOTY_ROTATION_FLAT_POS);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -203,7 +203,7 @@ public class DriverControl extends OpMode {
                 if (shootyRotationCount > 2) {
                     shootyRotationCount = 2;
                 }
-                robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_LAUNCH_HIGH);
+                robot.shootyRotation.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_LAUNCH_HIGH);
                 isUpChanged = true;
             } else if (!gamepad1.dpad_up) {
                 isUpChanged = false;
@@ -214,7 +214,7 @@ public class DriverControl extends OpMode {
                 if (shootyRotationCount < 0) {
                     shootyRotationCount = 0;
                 }
-                robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_FLAT_POS);
+                robot.shootyRotation.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_FLAT_POS);
                 isDownChanged = true;
             } else if (!gamepad1.dpad_down) {
                 isDownChanged = false;
@@ -315,7 +315,7 @@ public class DriverControl extends OpMode {
             telemetry.addData("Is arm motor busy", ""  + robot.armMotor.isBusy());
             telemetry.addData("Arm Motor Encoder Position", robot.armMotor.getCurrentPosition());
             telemetry.addData("Is Touching sensor", ": " + !robot.touchyKid.getState());
-            telemetry.addData("Shooty Rotation servo Position: ", "%5.2f", robot.shootyRotaion.getPosition());
+            telemetry.addData("Shooty Rotation servo Position: ", "%5.2f", robot.shootyRotation.getPosition());
             telemetry.addData("motorPower: " , "" + motorPower);
             telemetry.update();
 
@@ -349,17 +349,17 @@ public class DriverControl extends OpMode {
 
             //shooty rotation servo
             if(gamepad1.dpad_left) {
-                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() - DEBUG_INCREMENT);
-                if(robot.shootyRotaion.getPosition() < 0){
-                    robot.shootyRotaion.setPosition(0);
+                robot.shootyRotation.setPosition(robot.shootyRotation.getPosition() - DEBUG_INCREMENT);
+                if(robot.shootyRotation.getPosition() < 0){
+                    robot.shootyRotation.setPosition(0);
                 }
             } else if(gamepad1.dpad_right) {
-                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() + DEBUG_INCREMENT);
-                if(robot.shootyRotaion.getPosition() > 1){
-                    robot.shootyRotaion.setPosition(1);
+                robot.shootyRotation.setPosition(robot.shootyRotation.getPosition() + DEBUG_INCREMENT);
+                if(robot.shootyRotation.getPosition() > 1){
+                    robot.shootyRotation.setPosition(1);
                 }
             }
-            telemetry.addData("Shooty Rotation servo Position: ", "%5.2f", robot.shootyRotaion.getPosition());
+            telemetry.addData("Shooty Rotation servo Position: ", "%5.2f", robot.shootyRotation.getPosition());
 
             //arm Motor
             if(gamepad1.dpad_up){
@@ -410,7 +410,7 @@ public class DriverControl extends OpMode {
         if(!robot.touchyKid.getState()) {
             robot.armMotor.setPower(0.0);
         }
-        robot.shootyRotaion.setPosition(SHOOTY_ROTATION_FLAT_POS);
+        robot.shootyRotation.setPosition(SHOOTY_ROTATION_FLAT_POS);
         robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_DROP);
     }
     /*
