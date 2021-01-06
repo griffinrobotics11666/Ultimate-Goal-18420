@@ -281,9 +281,14 @@ public class DriverControl extends OpMode {
             } else if (!gamepad1.start) {
                 shootyIsRunningChanged = false;
             }
-            if (gamepad1.b && isBchanged) {
+            if (gamepad1.b && !isBchanged) {
+                isBchanged = true;
                 grabDepositRing();
+
+            } else if (!gamepad1.b) {
+                isBchanged = false;
             }
+
             //left stick
             double drive  =  gamepad1.left_stick_y; //note: for the future, the Y direction should be negated and not the x direction
             double strafe = -gamepad1.left_stick_x;
@@ -404,6 +409,9 @@ public class DriverControl extends OpMode {
     }
 
     public void grabDepositRing(){
+        /*TODO Figure out why it is skipping most of the first lines of code.
+        make two button presses--one for rotating shooty the other for raising
+        (consider using a state machine)*/
         robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot.armMotor.setTargetPosition(0);
         robot.armMotor.setPower(1);
@@ -412,6 +420,14 @@ public class DriverControl extends OpMode {
         }
         robot.shootyRotation.setPosition(SHOOTY_ROTATION_FLAT_POS);
         robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_DROP);
+        robot.clawServo.setPosition(CLAW_SERVO_OPEN_POS);
+        robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.armMotor.setTargetPosition(5375);
+        robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.armMotor.setPower(1);
+        if (robot.armMotor.getCurrentPosition() >= 5375) {
+            robot.armMotor.setPower(0.0);
+        }
     }
     /*
      * Code to run ONCE after the driver hits STOP
