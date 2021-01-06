@@ -33,10 +33,14 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorDigitalTouch;
 
 /**
  * This is NOT an opmode.
@@ -50,11 +54,17 @@ public class HardwareRobot
     public DcMotor rearRightDrive = null;
     public DcMotor frontRightDrive = null;
     public DcMotor frontLeftDrive = null;
+    public DcMotor armMotor = null;
+    public DcMotor shootyMotor = null;
 
     //define servos
     public Servo clawServo;
     public Servo clawRotationServo;
     public Servo shootyBoi;
+    public Servo shootyRotaion;
+
+    //define buttons
+    public DigitalChannel touchyKid = null;
 
     //define gyros
     BNO055IMU imuControl;
@@ -79,16 +89,21 @@ public class HardwareRobot
         hwMap = ahwMap;
 
         //Init drive motors
-        rearLeftDrive  = hwMap.get(DcMotor.class, "rear_left_drive"); //Expansion Hub Port 0
-        frontLeftDrive  = hwMap.get(DcMotor.class, "front_left_drive");   //Expansion Hub Port 1
-        rearRightDrive = hwMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
+        frontLeftDrive  = hwMap.get(DcMotor.class, "front_left_drive");   //Expansion Hub Port 0
+        rearLeftDrive  = hwMap.get(DcMotor.class, "rear_left_drive"); //Expansion Hub Port 1
         frontRightDrive = hwMap.get(DcMotor.class, "front_right_drive");  //Control Hub Port 0
+        rearRightDrive = hwMap.get(DcMotor.class, "rear_right_drive");    //Control Hub Port 1
+        armMotor = hwMap.get(DcMotor.class, "arm_motor");   //control hub port 2
+        shootyMotor = hwMap.get(DcMotor.class, "shooty_motor");   //expansion hub port 2
+        touchyKid = hwMap.get(DigitalChannel.class, "sensor_digital"); //control hub digital device port 0
 
         //sets init direction for drive motors
-        rearLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        rearRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
+        rearLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rearRightDrive.setDirection(DcMotor.Direction.REVERSE);
+        frontLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        frontRightDrive.setDirection(DcMotor.Direction.REVERSE);
+        armMotor.setDirection(DcMotor.Direction.FORWARD);
+        shootyMotor.setDirection(DcMotor.Direction.REVERSE);
 
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
@@ -112,12 +127,8 @@ public class HardwareRobot
         //initialize hardware variables for servos
         clawServo = hwMap.get(Servo.class, "claw_grip_servo");    //Control Hub Port 0
         clawRotationServo = hwMap.get(Servo.class, "claw_rotation_servo");  //Control Hub Port 1
-        shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Control Hub Port 2
-        //sets init position for servos
-        
-        clawServo.setPosition(0.5);
-        clawRotationServo.setPosition(0.5);
-        shootyBoi.setPosition(0.5);
+        shootyBoi = hwMap.get(Servo.class, "shooty_boi_servo");    //Expansion Hub Port 1
+        shootyRotaion = hwMap.get(Servo.class, "shooty_rotation_servo");    //Expansion Hub port 2
         
         //init hardware variables for color & distance sensors
        // colorSensor = hwMap.get(ColorSensor.class, "color_distance_sensor");

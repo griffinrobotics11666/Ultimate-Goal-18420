@@ -46,15 +46,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
-@Autonomous(name="Autonomous Test", group="Linear Opmode")
+@Autonomous(name="Simple Autonomous", group="Linear Opmode")
 //@Disabled
-public class AutonomousTest extends LinearOpMode {
+public class SimpleAutonomous extends LinearOpMode {
     HardwareRobot robot = new HardwareRobot();
 
     Orientation angleExpansion;
     Orientation angleControl;
-
-
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -68,43 +66,19 @@ public class AutonomousTest extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
         robot.init(hardwareMap);
 
-        telemetry.addData("Path0", "Starting at %7d :%7d",
-                robot.rearRightDrive.getCurrentPosition(),
-                robot.rearLeftDrive.getCurrentPosition(),
-                robot.frontLeftDrive.getCurrentPosition(),
-                robot.frontRightDrive.getCurrentPosition());
-
+        telemetry.addData("Status", "Ready");
         telemetry.update();
-
-
-        //telemetry.addData("Status", "Ready");
-        //telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
+        //gyro stuff for turn()
         robot.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         robot.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
-        // Step through each leg of the path,
-        // Note: Reverse movement is obtairobot by setting a negative distance (not speed)
-        //timeout is a failsafe to stop all motors if it takes too long
-//        encoderDrive(DRIVE_SPEED, 36, 10.0);  // S1: Forward 48 Inches with 5 Sec timeout
-        turn(-90, .5);
-        sleep(500);
-        turn(90, .5);
-//        encoderDrive(DRIVE_SPEED, -36, 10.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-//        turn(90, .5);
-//        sleep(500);
-//        turn(90, .5);
-
-
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
-
+        encoderDrive(DRIVE_SPEED, 72, 30);      //moves the robot forward 24 inches todo change this to the distance we want it to move forward
     }
 
 
@@ -147,7 +121,7 @@ public class AutonomousTest extends LinearOpMode {
             robot.rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             // calculate target positions
-            encoderTarget = robot.frontLeftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            encoderTarget = robot.frontLeftDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH * -1);
 
             //set target positions for motors
             robot.frontLeftDrive.setTargetPosition(encoderTarget);
@@ -170,8 +144,7 @@ public class AutonomousTest extends LinearOpMode {
 
 
             //if one of these is false, the loop will exit and will continue to set power for all wheels to 0
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.frontLeftDrive.isBusy() && robot.frontRightDrive.isBusy()
-                    && robot.rearLeftDrive.isBusy() && robot.rearRightDrive.isBusy()) {
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.frontLeftDrive.isBusy() && robot.frontRightDrive.isBusy() && robot.rearLeftDrive.isBusy() && robot.rearRightDrive.isBusy()) {
 
                 if(robot.frontLeftDrive.getCurrentPosition() < encoderTarget/2){   //accelerate in the positive direction
                     currentSpeed += 0.01;
@@ -247,10 +220,10 @@ public class AutonomousTest extends LinearOpMode {
                 increment = increment * (-0.5);
             }
         }
-            robot.frontLeftDrive.setPower (0);
-            robot.frontRightDrive.setPower(0);
-            robot.rearLeftDrive.setPower(0);
-            robot.rearRightDrive.setPower(0);
+        robot.frontLeftDrive.setPower (0);
+        robot.frontRightDrive.setPower(0);
+        robot.rearLeftDrive.setPower(0);
+        robot.rearRightDrive.setPower(0);
 
     }
 

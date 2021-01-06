@@ -38,8 +38,13 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
-
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 
 /**
@@ -61,11 +66,23 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class DriverControl extends OpMode {
     HardwareRobot robot = new HardwareRobot();
 
+    Orientation angleExpansion;
+    Orientation angleControl;
+
 
     private ElapsedTime runtime = new ElapsedTime();
 
-    boolean debug = false;
-    boolean isOpen = false;
+    //set up variables for the button presses
+    boolean debug = false, debugChanged = false;
+    boolean inPickupPos = true, isXchanged;
+    int shootyRotationCount = 0;
+    boolean isUpChanged, isDownChanged;
+    boolean isOpen = true, isOpenChanged = false;
+    boolean isRoofRaised = true, isYchanged= false; // true: arm is up, false: arm is down
+    boolean shootyIsRunning = false, shootyIsRunningChanged = false;
+    boolean isShooting = false, shootyIsShootingChanged = false;
+
+    double motorPower = 0;
 
     // Setup a variable for each drive wheel to save power level for telemetry
     double rearLeftPower;
@@ -74,23 +91,20 @@ public class DriverControl extends OpMode {
     double frontRightPower;
 
     //SETS MAX AND MIN POSITIONS FOR SERVOS
-    private static final double CLAW_SERVO_MAX_POS     =  0.67; //TODO
-    private static final double CLAW_SERVO_MIN_POS     =  0.34;
+    private static final double CLAW_SERVO_OPEN_POS     =  0.35;
+    private static final double CLAW_SERVO_CLOSE_POS     =  0.55;
 
-    private static final double CLAW_ROTATION_SERVO_MAX_POS     =  0.67; //TODO
-    private static final double CLAW_ROTATION_SERVO_MIN_POS     =  0.34;
+    private static final double SHOOTY_ROTATION_FLAT_POS     =  0.64;
+    private static final double SHOOTY_ROTATION_LAUNCH_LOW     =  0.19;
+    private static final double SHOOTY_ROTATION_LAUNCH_HIGH = 0.11;
 
-    private static final double SHOOTY_BOI_SERVO_FORWARD_POS     =  0.67; //TODO
-    private static final double SHOOTY_BOI_SERVO_BACKWARD_POS     =  0.34;
+    private static final double CLAW_ROTATION_SERVO_PICKUP     =  0.35;
+    private static final double CLAW_ROTATION_SERVO_DROP     =  0.49;
 
+    private static final double SHOOTY_BOI_SERVO_SHOOT_POS     =  0.64;
+    private static final double SHOOTY_BOI_SERVO_LOAD_POS     =  0.47;
 
-    private static final double INCREMENT   = 0.003;// amount to increase servo
     private static final double DEBUG_INCREMENT = 0.0005; //amt to increase servo in debug (slower)
-
-    //Used for debug
-    private double  clawServoPosition = 0.5;
-    private double  clawRotationServoPosition = 0.5;
-    private double  shootyBoiServoPosition = 0.5;
 
 
     /*
@@ -99,11 +113,26 @@ public class DriverControl extends OpMode {
     @Override
     public void init() {
         robot.init(hardwareMap);
-        //set DC motors to run w/o encoders
+
+        robot.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        robot.imuExpansion.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+
+        //set DC Motor drive modes
         robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        robot.shootyMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //set arm Motor to run with encoder
+        robot.armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
+        robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_PICKUP);
+        robot.clawServo.setPosition(CLAW_SERVO_OPEN_POS);
+        robot.shootyRotaion.setPosition(SHOOTY_ROTATION_FLAT_POS);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -130,30 +159,130 @@ public class DriverControl extends OpMode {
      */
     @Override
     public void loop() {
+
         if(!debug) {    //runs until debug is true
 
-            if (gamepad1.dpad_up) {  //will run the debug statement until false
+            if(gamepad1.back && !debugChanged){   //toggles debug
                 debug = true;
+                debugChanged = true;
+            } else if (!gamepad1.back) {
+                debugChanged = false;
             }
 
-            if(gamepad1.a){     //will open/ close claw grip
-                if(isOpen){
-                    robot.clawServo.setPosition(CLAW_SERVO_MIN_POS);
-                    isOpen = false;
-                } else {
-                    robot.clawServo.setPosition(CLAW_SERVO_MAX_POS);
-                    isOpen = true;
+            if(gamepad1.x && !isXchanged){   //toggles pickup and drop position for rotation
+                robot.clawRotationServo.setPosition(inPickupPos ? CLAW_ROTATION_SERVO_DROP : CLAW_ROTATION_SERVO_PICKUP);
+                inPickupPos = !inPickupPos;
+                isXchanged = true;
+            } else if (!gamepad1.x) {
+                isXchanged = false;
+            }
+
+            if(gamepad1.a && !isOpenChanged){   //toggles open and close of claw servo
+                robot.clawServo.setPosition(isOpen ? CLAW_SERVO_CLOSE_POS : CLAW_SERVO_OPEN_POS);
+                isOpen = !isOpen;
+                isOpenChanged = true;
+            } else if (!gamepad1.a) {
+                isOpenChanged = false;
+            }
+
+//            if(gamepad1.dpad_left) {
+//                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() - 0.005);
+//                if(robot.shootyRotaion.getPosition() < 0){
+//                    robot.shootyRotaion.setPosition(0);
+//                }
+//            } else if(gamepad1.dpad_right) {
+//                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() + 0.005);
+//                if(robot.shootyRotaion.getPosition() > 1){
+//                    robot.shootyRotaion.setPosition(1);
+//                }
+//            }
+
+            if(gamepad1.dpad_up && !isUpChanged){   //toggles position of shooty rotation servo UP
+                shootyRotationCount++;
+                if(shootyRotationCount > 2){
+                    shootyRotationCount = 2;
                 }
+                robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_LAUNCH_HIGH);
+                isUpChanged = true;
+            } else if (!gamepad1.dpad_up) {
+                isUpChanged = false;
             }
 
-            if(gamepad1.right_bumper){  //will shoot shooty boi
-                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_FORWARD_POS);
-                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_BACKWARD_POS);
+            if(gamepad1.dpad_down && !isDownChanged){   //toggles position of shooty rotation servo DOWN
+                shootyRotationCount--;
+                if(shootyRotationCount < 0){
+                    shootyRotationCount = 0;
+                }
+                robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_FLAT_POS);
+                isDownChanged = true;
+            } else if (!gamepad1.dpad_down) {
+                isDownChanged = false;
             }
 
+//            if(gamepad1.dpad_up){ //to manually adjust value of shooty motor speed
+//                motorPower += 0.01;
+//                if(motorPower >1){
+//                    motorPower = 1;
+//                }
+//                robot.shootyMotor.setPower(motorPower);
+//            } else if (gamepad1.dpad_down){
+//                motorPower -= 0.01;
+//                if(motorPower < 0){
+//                    motorPower = 0;
+//                }
+//                robot.shootyMotor.setPower(motorPower);
+//            }
+
+            if(gamepad1.y && !isYchanged){   //changes value of isRoofRaised
+                isYchanged = true;
+                if(isRoofRaised){   //MOVE ARM MOTOR DOWN
+                    if(!robot.touchyKid.getState()) {   //checks if limit switch is closed
+                        robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                        robot.armMotor.setTargetPosition(5375);
+                        robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        robot.armMotor.setPower(1);
+                        if (robot.armMotor.getCurrentPosition() >= 5375) {
+                            robot.armMotor.setPower(0.0);
+                        }
+                    }
+                } else if(!isRoofRaised){   //MOVE ARM MOTOR UP
+                    robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    robot.armMotor.setTargetPosition(0);
+                    robot.armMotor.setPower(1);
+                    if(!robot.touchyKid.getState()){
+                        robot.armMotor.setPower(0.0);
+                    }
+                }
+                isRoofRaised = !isRoofRaised;
+            } else if (!gamepad1.y) {
+                isYchanged = false;
+            }
+
+
+            if(gamepad1.right_bumper && !shootyIsShootingChanged){   //shoots disc
+                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_SHOOT_POS);
+                double pressTime = runtime.milliseconds();
+                while(runtime.milliseconds()-pressTime < 250){  //wait until the shooty servo has fully moves forward.
+                    telemetry.addData("Wait " ,"true");
+                    telemetry.update();
+                }
+                robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
+                isShooting = !isShooting;
+                shootyIsShootingChanged = true;
+            } else if (!gamepad1.right_bumper) {
+                shootyIsShootingChanged = false;
+            }
+
+            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.59);
+                shootyIsRunning = !shootyIsRunning;
+                shootyIsRunningChanged = true;
+            } else if (!gamepad1.start) {
+                shootyIsRunningChanged = false;
+            }
 
             //left stick
-            double drive  =  gamepad1.left_stick_y;
+            double drive  =  gamepad1.left_stick_y; //note: for the future, the Y direction should be negated and not the x direction
             double strafe = -gamepad1.left_stick_x;
             //right stick
             double turn = -gamepad1.right_stick_x;
@@ -178,81 +307,116 @@ public class DriverControl extends OpMode {
 
             // Show the elapsed game time.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Is Open", ": " + isOpen);
+            telemetry.addData("Is roof raised", ": " + isRoofRaised);
+            telemetry.addData("Is arm motor busy", ""  + robot.armMotor.isBusy());
+            telemetry.addData("Arm Motor Encoder Position", robot.armMotor.getCurrentPosition());
+            telemetry.addData("Is Touching sensor", ": " + !robot.touchyKid.getState());
+            telemetry.addData("Shooty Rotation servo Position: ", "%5.2f", robot.shootyRotaion.getPosition());
+            telemetry.addData("motorPower: " , "" + motorPower);
             telemetry.update();
-
-
 
         } else {    //runs if debug = true
             telemetry.addData("Debug mode: " ,"enabled.");
 
             //claw servo
             if(gamepad1.b) {
-                clawServoPosition-= DEBUG_INCREMENT;
-//                if(clawServoPosition >= LEFT_MAX_POS) {
-//                    clawServoPosition = LEFT_MAX_POS;
-//                }
-                robot.clawServo.setPosition(clawServoPosition);
+                robot.clawServo.setPosition(robot.clawServo.getPosition() + DEBUG_INCREMENT);
+            } else if(gamepad1.a) {
+                robot.clawServo.setPosition(robot.clawServo.getPosition() - DEBUG_INCREMENT);
             }
-            if(gamepad1.x) {
-                clawServoPosition += DEBUG_INCREMENT;
-//                if(clawServoPosition <= RIGHT_MIN_POS) {
-//                    clawServoPosition = RIGHT_MIN_POS;
-//                }
-                robot.clawServo.setPosition(clawServoPosition);
-            }
-            
+            telemetry.addData("Claw servo Position: ", "%5.2f", robot.clawServo.getPosition());
+
             //rotation servo
-            if(gamepad1.a) {   
-                clawRotationServoPosition += DEBUG_INCREMENT;
-//                if(clawRotationServoPosition <= LEFT_MIN_POS) {
-//                    clawRotationServoPosition = LEFT_MIN_POS;
-//                }
-                robot.clawRotationServo.setPosition(clawRotationServoPosition);
-            }
             if(gamepad1.y) {
-                clawRotationServoPosition -= DEBUG_INCREMENT;
-//                if(clawRotationServoPosition >= RIGHT_MAX_POS) {
-//                    clawRotationServoPosition = RIGHT_MAX_POS;
-//                }
-                robot.clawRotationServo.setPosition(clawRotationServoPosition);
+                robot.clawRotationServo.setPosition(robot.clawRotationServo.getPosition() + DEBUG_INCREMENT);
+            } else if(gamepad1.x) {
+                robot.clawRotationServo.setPosition(robot.clawRotationServo.getPosition() - DEBUG_INCREMENT);
             }
-            
+            telemetry.addData("Claw Rotation servo Position: ", "%5.2f", robot.clawRotationServo.getPosition());
+
             //shooty boi servo
-            if(gamepad1.right_bumper) {
-                shootyBoiServoPosition += DEBUG_INCREMENT;
-//                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
-//                    shootyBoiServoPosition = RIGHT_MAX_POS;
-//                }
-                robot.shootyBoi.setPosition(shootyBoiServoPosition);
-            }
-            if(gamepad1.left_bumper) {
-                shootyBoiServoPosition -= DEBUG_INCREMENT;
-//                if(shootyBoiServoPosition >= RIGHT_MAX_POS) {
-//                    shootyBoiServoPosition = RIGHT_MAX_POS;
-//                }
-                robot.shootyBoi.setPosition(shootyBoiServoPosition);
-            }
+//            if(gamepad1.right_bumper) {
+//                robot.shootyBoi.setPosition(robot.shootyBoi.getPosition() + DEBUG_INCREMENT);
+//            } else if (gamepad1.left_bumper) {
+//                robot.shootyBoi.setPosition(robot.shootyBoi.getPosition() - DEBUG_INCREMENT);
+//            }
+//            telemetry.addData("Shooty Boi servo Position: ", "%5.2f", robot.shootyBoi.getPosition());
 
 
-            if(gamepad1.dpad_down) {    //will exit out of loop if down is pressed
+            //shooty rotation servo
+            if(gamepad1.dpad_left) {
+                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() - DEBUG_INCREMENT);
+                if(robot.shootyRotaion.getPosition() < 0){
+                    robot.shootyRotaion.setPosition(0);
+                }
+            } else if(gamepad1.dpad_right) {
+                robot.shootyRotaion.setPosition(robot.shootyRotaion.getPosition() + DEBUG_INCREMENT);
+                if(robot.shootyRotaion.getPosition() > 1){
+                    robot.shootyRotaion.setPosition(1);
+                }
+            }
+            telemetry.addData("Shooty Rotation servo Position: ", "%5.2f", robot.shootyRotaion.getPosition());
+
+            //arm Motor
+            if(gamepad1.dpad_up){
+                robot.armMotor.setPower(-.5);
+            }
+            else if (gamepad1.dpad_down){
+                robot.armMotor.setPower(.5);
+            }
+            else{
+                robot.armMotor.setPower(0);
+            }
+            telemetry.addData("Arm Motor ", "Position: %7d", robot.armMotor.getCurrentPosition());
+            telemetry.addData("touchyKid", robot.touchyKid.getState());
+            telemetry.addData("Current Angle", readDoubleAngle());
+            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+                robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.59);
+                shootyIsRunning = !shootyIsRunning;
+                shootyIsRunningChanged = true;
+            } else if (!gamepad1.start) {
+                shootyIsRunningChanged = false;
+            }
+
+            if(gamepad1.back && !debugChanged){   //toggles debug
                 debug = false;
+                debugChanged = true;
+            } else if (!gamepad1.back) {
+                debugChanged = false;
             }
-
-            //adds telemetry data for servos to phone
-            telemetry.addData("Claw servo Position: ", "%5.2f", clawServoPosition);
-            telemetry.addData("Claw Rotation servo Position: ", "%5.2f", clawRotationServoPosition);
-            telemetry.addData("Shooty Boi servo Position: ", "%5.2f", shootyBoiServoPosition);
             telemetry.update();
-
         }
-
     }
+
+    public String readAngle() {
+        angleControl = robot.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angleExpansion = robot.imuExpansion.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return "Expansion: " + String.valueOf(angleExpansion.firstAngle) + "\nAngle: Control: " + String.valueOf(angleControl.firstAngle);
+    }
+
+    public double readDoubleAngle() {
+        angleControl = robot.imuControl.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return angleControl.firstAngle;
+    }
+
 
     /*
      * Code to run ONCE after the driver hits STOP
      */
     @Override
     public void stop() {
+        //TODO uncomment this section if you guys want the robot to automatically raise the arm when it turns off so we dont have to deal with manually moving it & ensure it starts upright
+//        if(!isRoofRaised){   //MOVE ARM MOTOR UP
+//            robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            robot.armMotor.setTargetPosition(0);
+//            robot.armMotor.setPower(1);
+//            if(!robot.touchyKid.getState()){
+//                robot.armMotor.setPower(0.0);
+//            }
+//        }
     }
+
+
 
 }
