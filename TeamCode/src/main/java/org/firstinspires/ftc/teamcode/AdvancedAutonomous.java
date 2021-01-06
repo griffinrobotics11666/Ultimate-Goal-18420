@@ -62,6 +62,10 @@ public class AdvancedAutonomous extends LinearOpMode {
     private static final double SHOOTY_ROTATION_LAUNCH_HIGH = 0.11;
     private static final double CLAW_ROTATION_SERVO_PICKUP     =  0.35;
     private static final double CLAW_ROTATION_SERVO_DROP     =  0.49;
+    private static final double CLAW_SERVO_OPEN_POS     =  0.35;
+    private static final double CLAW_SERVO_CLOSE_POS     =  0.55;
+
+
 
 
 
@@ -82,6 +86,9 @@ public class AdvancedAutonomous extends LinearOpMode {
         telemetry.addData("Status", "Ready");
         telemetry.update();
         robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_PICKUP);
+        robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_DROP);
+        robot.clawRotationServo.setPosition(CLAW_SERVO_OPEN_POS);
+        robot.clawRotationServo.setPosition(CLAW_SERVO_CLOSE_POS);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
@@ -127,6 +134,7 @@ public class AdvancedAutonomous extends LinearOpMode {
 
             robot.shootyBoi.setPosition(SHOOTY_ROTATION_FLAT_POS); //returns the shooting platform to its normal flat position
             robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_PICKUP);
+            robot.shootyBoi.setPosition(SHOOTY_ROTATION_LAUNCH_LOW);
 
             robot.shootyMotor.setPower(0.59);       //turn off the shooty motor
 

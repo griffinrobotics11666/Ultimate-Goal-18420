@@ -81,6 +81,7 @@ public class DriverControl extends OpMode {
     boolean isRoofRaised = true, isYchanged= false; // true: arm is up, false: arm is down
     boolean shootyIsRunning = false, shootyIsRunningChanged = false;
     boolean isShooting = false, shootyIsShootingChanged = false;
+    boolean isBchanged = false;
 
     double motorPower = 0;
 
@@ -162,14 +163,14 @@ public class DriverControl extends OpMode {
 
         if(!debug) {    //runs until debug is true
 
-            if(gamepad1.back && !debugChanged){   //toggles debug
+            if (gamepad1.back && !debugChanged) {   //toggles debug
                 debug = true;
                 debugChanged = true;
             } else if (!gamepad1.back) {
                 debugChanged = false;
             }
 
-            if(gamepad1.x && !isXchanged){   //toggles pickup and drop position for rotation
+            if (gamepad1.x && !isXchanged) {   //toggles pickup and drop position for rotation
                 robot.clawRotationServo.setPosition(inPickupPos ? CLAW_ROTATION_SERVO_DROP : CLAW_ROTATION_SERVO_PICKUP);
                 inPickupPos = !inPickupPos;
                 isXchanged = true;
@@ -177,7 +178,7 @@ public class DriverControl extends OpMode {
                 isXchanged = false;
             }
 
-            if(gamepad1.a && !isOpenChanged){   //toggles open and close of claw servo
+            if (gamepad1.a && !isOpenChanged) {   //toggles open and close of claw servo
                 robot.clawServo.setPosition(isOpen ? CLAW_SERVO_CLOSE_POS : CLAW_SERVO_OPEN_POS);
                 isOpen = !isOpen;
                 isOpenChanged = true;
@@ -197,9 +198,9 @@ public class DriverControl extends OpMode {
 //                }
 //            }
 
-            if(gamepad1.dpad_up && !isUpChanged){   //toggles position of shooty rotation servo UP
+            if (gamepad1.dpad_up && !isUpChanged) {   //toggles position of shooty rotation servo UP
                 shootyRotationCount++;
-                if(shootyRotationCount > 2){
+                if (shootyRotationCount > 2) {
                     shootyRotationCount = 2;
                 }
                 robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_LAUNCH_HIGH);
@@ -208,9 +209,9 @@ public class DriverControl extends OpMode {
                 isUpChanged = false;
             }
 
-            if(gamepad1.dpad_down && !isDownChanged){   //toggles position of shooty rotation servo DOWN
+            if (gamepad1.dpad_down && !isDownChanged) {   //toggles position of shooty rotation servo DOWN
                 shootyRotationCount--;
-                if(shootyRotationCount < 0){
+                if (shootyRotationCount < 0) {
                     shootyRotationCount = 0;
                 }
                 robot.shootyRotaion.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_FLAT_POS);
@@ -233,10 +234,10 @@ public class DriverControl extends OpMode {
 //                robot.shootyMotor.setPower(motorPower);
 //            }
 
-            if(gamepad1.y && !isYchanged){   //changes value of isRoofRaised
+            if (gamepad1.y && !isYchanged) {   //changes value of isRoofRaised
                 isYchanged = true;
-                if(isRoofRaised){   //MOVE ARM MOTOR DOWN
-                    if(!robot.touchyKid.getState()) {   //checks if limit switch is closed
+                if (isRoofRaised) {   //MOVE ARM MOTOR DOWN
+                    if (!robot.touchyKid.getState()) {   //checks if limit switch is closed
                         robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         robot.armMotor.setTargetPosition(5375);
                         robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -245,11 +246,11 @@ public class DriverControl extends OpMode {
                             robot.armMotor.setPower(0.0);
                         }
                     }
-                } else if(!isRoofRaised){   //MOVE ARM MOTOR UP
+                } else if (!isRoofRaised) {   //MOVE ARM MOTOR UP
                     robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     robot.armMotor.setTargetPosition(0);
                     robot.armMotor.setPower(1);
-                    if(!robot.touchyKid.getState()){
+                    if (!robot.touchyKid.getState()) {
                         robot.armMotor.setPower(0.0);
                     }
                 }
@@ -259,11 +260,11 @@ public class DriverControl extends OpMode {
             }
 
 
-            if(gamepad1.right_bumper && !shootyIsShootingChanged){   //shoots disc
+            if (gamepad1.right_bumper && !shootyIsShootingChanged) {   //shoots disc
                 robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_SHOOT_POS);
                 double pressTime = runtime.milliseconds();
-                while(runtime.milliseconds()-pressTime < 250){  //wait until the shooty servo has fully moves forward.
-                    telemetry.addData("Wait " ,"true");
+                while (runtime.milliseconds() - pressTime < 250) {  //wait until the shooty servo has fully moves forward.
+                    telemetry.addData("Wait ", "true");
                     telemetry.update();
                 }
                 robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
@@ -273,14 +274,16 @@ public class DriverControl extends OpMode {
                 shootyIsShootingChanged = false;
             }
 
-            if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
+            if (gamepad1.start && !shootyIsRunningChanged) {   //toggles turning on and off shooty motor
                 robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.59);
                 shootyIsRunning = !shootyIsRunning;
                 shootyIsRunningChanged = true;
             } else if (!gamepad1.start) {
                 shootyIsRunningChanged = false;
             }
-
+            if (gamepad1.b && isBchanged) {
+                grabDepositRing();
+            }
             //left stick
             double drive  =  gamepad1.left_stick_y; //note: for the future, the Y direction should be negated and not the x direction
             double strafe = -gamepad1.left_stick_x;
@@ -400,7 +403,16 @@ public class DriverControl extends OpMode {
         return angleControl.firstAngle;
     }
 
-
+    public void grabDepositRing(){
+        robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.armMotor.setTargetPosition(0);
+        robot.armMotor.setPower(1);
+        if(!robot.touchyKid.getState()) {
+            robot.armMotor.setPower(0.0);
+        }
+        robot.shootyRotaion.setPosition(SHOOTY_ROTATION_FLAT_POS);
+        robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_DROP);
+    }
     /*
      * Code to run ONCE after the driver hits STOP
      */
