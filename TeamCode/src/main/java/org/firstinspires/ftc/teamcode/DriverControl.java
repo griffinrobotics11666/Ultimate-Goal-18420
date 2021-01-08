@@ -71,6 +71,9 @@ public class DriverControl extends OpMode {
 
 
     private ElapsedTime runtime = new ElapsedTime();
+    private ElapsedTime switchTime = new ElapsedTime();
+
+
 
     //set up variables for the button presses
     boolean debug = false, debugChanged = false;
@@ -107,6 +110,9 @@ public class DriverControl extends OpMode {
 
     private static final double DEBUG_INCREMENT = 0.0005; //amt to increase servo in debug (slower)
 
+    enum grabbingState{armUp, dropRing, armDown}
+    grabbingState state = grabbingState.armUp;
+    int armDelay = 4000;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -245,6 +251,7 @@ public class DriverControl extends OpMode {
                         if (robot.armMotor.getCurrentPosition() >= 5375) {
                             robot.armMotor.setPower(0.0);
                         }
+                        state = grabbingState.armUp;
                     }
                 } else if (!isRoofRaised) {   //MOVE ARM MOTOR UP
                     robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -253,6 +260,7 @@ public class DriverControl extends OpMode {
                     if (!robot.touchyKid.getState()) {
                         robot.armMotor.setPower(0.0);
                     }
+                    state = grabbingState.armDown;
                 }
                 isRoofRaised = !isRoofRaised;
             } else if (!gamepad1.y) {
@@ -281,14 +289,40 @@ public class DriverControl extends OpMode {
             } else if (!gamepad1.start) {
                 shootyIsRunningChanged = false;
             }
-            if (gamepad1.b && !isBchanged) {
+            /*if (gamepad1.b && !isBchanged) {
                 isBchanged = true;
                 grabDepositRing();
 
             } else if (!gamepad1.b) {
                 isBchanged = false;
             }
-
+            */
+            switch(state){
+                case armUp:
+                    if(gamepad1.b && switchTime.milliseconds() >= armDelay) {
+                        robot.clawServo.setPosition(CLAW_SERVO_CLOSE_POS);
+                        robot.armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        robot.armMotor.setTargetPosition(0);
+                        robot.armMotor.setPower(1);
+                        robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_DROP);
+                        state = grabbingState.dropRing;
+                        switchTime.reset();
+                        break;
+                    }
+                case dropRing:
+                    if(switchTime.milliseconds() >= armDelay){
+                        robot.clawServo.setPosition(CLAW_SERVO_OPEN_POS);
+                        state = grabbingState.armDown;
+                        break;
+                    }
+                case armDown:
+                    switchTime.reset();
+                    robot.armMotor.setTargetPosition(5375);
+                    robot.armMotor.setPower(1);
+                    robot.shootyRotation.setPosition(SHOOTY_ROTATION_FLAT_POS);
+                    state = grabbingState.armUp;
+                    break;
+            }
             //left stick
             double drive  =  gamepad1.left_stick_y; //note: for the future, the Y direction should be negated and not the x direction
             double strafe = -gamepad1.left_stick_x;
