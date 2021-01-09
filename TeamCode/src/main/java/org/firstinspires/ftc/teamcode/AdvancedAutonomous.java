@@ -85,10 +85,9 @@ public class AdvancedAutonomous extends LinearOpMode {
 
         telemetry.addData("Status", "Ready");
         telemetry.update();
-        robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_PICKUP);
-        robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_DROP);
-        robot.clawRotationServo.setPosition(CLAW_SERVO_OPEN_POS);
-        robot.clawRotationServo.setPosition(CLAW_SERVO_CLOSE_POS);
+        robot.clawRotationServo.setPosition(0.68);
+        robot.clawServo.setPosition(0.22);
+        robot.shootyRotation.setPosition(0.89);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
@@ -112,23 +111,26 @@ public class AdvancedAutonomous extends LinearOpMode {
 
             robot.shootyMotor.setPower(0.59);       //turn on the shooty motor
 
-            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH_HIGH + .02);    //sets the shooting platform to the lower angle
+            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH_HIGH - 0.9);    //sets the shooting platform to the high angle
 
             turn(-3, TURN_SPEED);  //turns left (make positive if turns right) 10 degrees todo test this with different values to find the best one to hit the first target
             sleep(3000); //small delay so things dont happen too quickly, adjust time and add/remove more if needed
 
             //SHOOT ONCE
             shoot();    //see method below
-            sleep(1500);
+            sleep(1000);
+            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH_HIGH - 1);
+            sleep(500);
+
 
             //SHOOT TWICE
             shoot();
-            sleep(1500);
+            sleep(1000);
+            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH_HIGH - 1);
+            sleep(500);
 
             //SHOOT THRICE
             shoot();
-            sleep(1500);
-
             turn(3, TURN_SPEED);   //rotates the bot back to its original angle
             sleep(1500);
 

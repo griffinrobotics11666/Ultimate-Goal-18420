@@ -70,7 +70,9 @@ public class SimpleAutonomous extends LinearOpMode {
 
         telemetry.addData("Status", "Ready");
         telemetry.update();
-
+        robot.clawRotationServo.setPosition(0.68);
+        robot.clawServo.setPosition(0.22);
+        robot.shootyRotation.setPosition(0.89);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 

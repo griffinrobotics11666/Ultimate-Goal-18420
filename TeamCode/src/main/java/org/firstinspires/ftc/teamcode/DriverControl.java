@@ -85,6 +85,7 @@ public class DriverControl extends OpMode {
     boolean shootyIsRunning = false, shootyIsRunningChanged = false;
     boolean isShooting = false, shootyIsShootingChanged = false;
     boolean isBchanged = false;
+    boolean isLBchanged = false;
 
     double motorPower = 0;
 
@@ -104,6 +105,8 @@ public class DriverControl extends OpMode {
 
     private static final double CLAW_ROTATION_SERVO_PICKUP     =  0.35;
     private static final double CLAW_ROTATION_SERVO_DROP     =  0.49;
+    private static final double CLAW_ROTATION_WOBBLE       =  0.20;
+
 
     private static final double SHOOTY_BOI_SERVO_SHOOT_POS     =  0.64;
     private static final double SHOOTY_BOI_SERVO_LOAD_POS     =  0.47;
@@ -137,9 +140,9 @@ public class DriverControl extends OpMode {
         robot.armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
-        robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_PICKUP);
-        robot.clawServo.setPosition(CLAW_SERVO_OPEN_POS);
-        robot.shootyRotation.setPosition(SHOOTY_ROTATION_FLAT_POS);
+        robot.clawRotationServo.setPosition(0.68);
+        robot.clawServo.setPosition(0.22);
+        robot.shootyRotation.setPosition(0.89);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -174,6 +177,13 @@ public class DriverControl extends OpMode {
                 debugChanged = true;
             } else if (!gamepad1.back) {
                 debugChanged = false;
+            }
+
+            if (gamepad1.left_bumper && !isLBchanged) {   //moves shoty rotation to drop the wobble goal
+                robot.clawRotationServo.setPosition(CLAW_ROTATION_WOBBLE);
+                debugChanged = true;
+            } else if (!gamepad1.left_bumper) {
+                isLBchanged = false;
             }
 
             if (gamepad1.x && !isXchanged) {   //toggles pickup and drop position for rotation
@@ -322,7 +332,7 @@ public class DriverControl extends OpMode {
                 }
 
                 case armDown: {
-                    if (gamepad1.b && switchTime.milliseconds() >= armDelay) {
+                    if (gamepad1.b && switchTime.milliseconds() >= 500) {
                         switchTime.reset();
                         robot.armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         robot.armMotor.setTargetPosition(5375);
