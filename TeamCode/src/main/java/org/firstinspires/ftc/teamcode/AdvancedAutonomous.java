@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
@@ -54,12 +55,12 @@ public class AdvancedAutonomous extends LinearOpMode {
     Orientation angleExpansion;
     Orientation angleControl;
 
+
     boolean isRoofRaised = true;
     private static final double SHOOTY_BOI_SERVO_SHOOT_POS     =  0.64;
     private static final double SHOOTY_BOI_SERVO_LOAD_POS     =  0.47;
     private static final double SHOOTY_ROTATION_FLAT_POS     =  0.64;
-    private static final double SHOOTY_ROTATION_LAUNCH_LOW     =  0.19;
-    private static final double SHOOTY_ROTATION_LAUNCH_HIGH = 0.11;
+    private static double SHOOTY_ROTATION_LAUNCH = 0.13;
     private static final double CLAW_ROTATION_SERVO_PICKUP     =  0.35;
     private static final double CLAW_ROTATION_SERVO_DROP     =  0.49;
     private static final double CLAW_SERVO_OPEN_POS     =  0.35;
@@ -88,6 +89,25 @@ public class AdvancedAutonomous extends LinearOpMode {
         robot.clawRotationServo.setPosition(0.68);
         robot.clawServo.setPosition(0.22);
         robot.shootyRotation.setPosition(0.89);
+
+        if (robot.voltage.getVoltage() > 13.5){
+            SHOOTY_ROTATION_LAUNCH = 0.16;
+        } else if(robot.voltage.getVoltage() > 13.15){
+            SHOOTY_ROTATION_LAUNCH = 0.15;
+        } else if(robot.voltage.getVoltage() > 12.9){
+            SHOOTY_ROTATION_LAUNCH = 0.14;
+        } else if(robot.voltage.getVoltage() > 12.78){
+            SHOOTY_ROTATION_LAUNCH = 0.13;
+        } else if(robot.voltage.getVoltage() >= 12.65){
+            SHOOTY_ROTATION_LAUNCH = 0.12;
+        } else if(robot.voltage.getVoltage() < 12.65){
+            SHOOTY_ROTATION_LAUNCH = 0.14;
+        }
+
+        telemetry.addData("Shooty Launch Rotation pos", SHOOTY_ROTATION_LAUNCH);
+        telemetry.addData("voltage", robot.voltage.getVoltage());
+        telemetry.update();
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
@@ -111,7 +131,7 @@ public class AdvancedAutonomous extends LinearOpMode {
 
             robot.shootyMotor.setPower(0.59);       //turn on the shooty motor
 
-            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH_HIGH - 0.9);    //sets the shooting platform to the high angle
+            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH);    //sets the shooting platform to the high angle
 
             turn(-3, TURN_SPEED);  //turns left (make positive if turns right) 10 degrees todo test this with different values to find the best one to hit the first target
             sleep(3000); //small delay so things dont happen too quickly, adjust time and add/remove more if needed
@@ -119,14 +139,14 @@ public class AdvancedAutonomous extends LinearOpMode {
             //SHOOT ONCE
             shoot();    //see method below
             sleep(1000);
-            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH_HIGH - 1);
+            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH);
             sleep(500);
 
 
             //SHOOT TWICE
             shoot();
             sleep(1000);
-            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH_HIGH - 1);
+            robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH);
             sleep(500);
 
             //SHOOT THRICE
@@ -153,6 +173,7 @@ public class AdvancedAutonomous extends LinearOpMode {
         encoderDrive(DRIVE_SPEED, 30, 30);
 
         telemetry.addData("Path", "Complete");
+
         telemetry.update();
 
     }

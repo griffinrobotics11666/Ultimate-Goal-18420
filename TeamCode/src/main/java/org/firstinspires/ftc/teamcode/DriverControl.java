@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -68,6 +69,7 @@ public class DriverControl extends OpMode {
 
     Orientation angleExpansion;
     Orientation angleControl;
+
 
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -383,6 +385,7 @@ public class DriverControl extends OpMode {
             telemetry.addData("Shooty Rotation servo Position: ", "%5.2f", robot.shootyRotation.getPosition());
             telemetry.addData("motorPower: " , "" + motorPower);
             telemetry.addData("State", ": " + state);
+            telemetry.addData("Voltage", ": " + robot.voltage.getVoltage());
             telemetry.addData("SwitchTime", ": " + switchTime.toString());
 
             telemetry.update();
@@ -393,8 +396,12 @@ public class DriverControl extends OpMode {
             //claw servo
             if(gamepad1.b) {
                 robot.clawServo.setPosition(robot.clawServo.getPosition() + DEBUG_INCREMENT);
+
             } else if(gamepad1.a) {
                 robot.clawServo.setPosition(robot.clawServo.getPosition() - DEBUG_INCREMENT);
+                if(robot.clawServo.getPosition() <= 0.35){
+                    robot.clawServo.setPosition(0.35);
+                }
             }
             telemetry.addData("Claw servo Position: ", "%5.2f", robot.clawServo.getPosition());
 
@@ -439,9 +446,11 @@ public class DriverControl extends OpMode {
             else{
                 robot.armMotor.setPower(0);
             }
+
             telemetry.addData("Arm Motor ", "Position: %7d", robot.armMotor.getCurrentPosition());
             telemetry.addData("touchyKid", robot.touchyKid.getState());
             telemetry.addData("Current Angle", readDoubleAngle());
+
             if(gamepad1.start && !shootyIsRunningChanged){   //toggles turning on and off shooty motor
                 robot.shootyMotor.setPower(shootyIsRunning ? 0 : 0.59);
                 shootyIsRunning = !shootyIsRunning;

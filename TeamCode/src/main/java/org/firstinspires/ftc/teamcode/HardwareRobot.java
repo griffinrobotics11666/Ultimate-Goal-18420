@@ -37,6 +37,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -66,6 +67,8 @@ public class HardwareRobot
     public Servo clawRotationServo;
     public Servo shootyBoi;
     public Servo shootyRotation;
+
+    VoltageSensor voltage;
 
     //define buttons
     public DigitalChannel touchyKid = null;
@@ -100,6 +103,8 @@ public class HardwareRobot
         armMotor = hwMap.get(DcMotor.class, "arm_motor");   //control hub port 2
         shootyMotor = hwMap.get(DcMotor.class, "shooty_motor");   //expansion hub port 2
         touchyKid = hwMap.get(DigitalChannel.class, "sensor_digital"); //control hub digital device port 0
+
+        voltage = hwMap.voltageSensor.iterator().next();
 
         //sets init direction for drive motors
         rearLeftDrive.setDirection(DcMotor.Direction.FORWARD);
