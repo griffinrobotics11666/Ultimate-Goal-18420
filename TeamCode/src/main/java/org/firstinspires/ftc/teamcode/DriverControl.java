@@ -143,7 +143,7 @@ public class DriverControl extends OpMode {
 
         robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
         robot.clawRotationServo.setPosition(0.68);
-        robot.clawServo.setPosition(0.22);
+        robot.clawServo.setPosition(0.35);
         robot.shootyRotation.setPosition(0.89);
 
         // Tell the driver that initialization is complete.

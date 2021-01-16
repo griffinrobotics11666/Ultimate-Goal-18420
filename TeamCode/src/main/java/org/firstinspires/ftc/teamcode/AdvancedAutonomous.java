@@ -90,8 +90,10 @@ public class AdvancedAutonomous extends LinearOpMode {
         robot.clawServo.setPosition(0.22);
         robot.shootyRotation.setPosition(0.89);
 
-        if (robot.voltage.getVoltage() > 13.5){
-            SHOOTY_ROTATION_LAUNCH = 0.16;
+        if(robot.voltage.getVoltage() > 13.8){
+            SHOOTY_ROTATION_LAUNCH = 0.18;
+        } else if (robot.voltage.getVoltage() > 13.5){
+            SHOOTY_ROTATION_LAUNCH = 0.17;
         } else if(robot.voltage.getVoltage() > 13.15){
             SHOOTY_ROTATION_LAUNCH = 0.15;
         } else if(robot.voltage.getVoltage() > 12.9){
