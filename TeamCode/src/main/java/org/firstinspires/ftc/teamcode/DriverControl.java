@@ -148,21 +148,7 @@ public class DriverControl extends OpMode {
         robot.clawServo.setPosition(0.35);
         robot.shootyRotation.setPosition(0.89);
 
-        if(robot.voltage.getVoltage() > 13.8){
-            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.18;
-        } else if (robot.voltage.getVoltage() > 13.5){
-            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.17;
-        } else if(robot.voltage.getVoltage() > 13.15){
-            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.15;
-        } else if(robot.voltage.getVoltage() > 12.9){
-            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.14;
-        } else if(robot.voltage.getVoltage() > 12.78){
-            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.13;
-        } else if(robot.voltage.getVoltage() >= 12.65){
-            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.12;
-        } else if(robot.voltage.getVoltage() < 12.65){
-            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.14;
-        }
+
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -184,6 +170,22 @@ public class DriverControl extends OpMode {
     @Override
     public void start() {
         runtime.reset();
+
+        if(robot.voltage.getVoltage() > 13.8){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.15;
+        } else if (robot.voltage.getVoltage() > 13.5){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.14;
+        } else if(robot.voltage.getVoltage() > 13.15){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.13;
+        } else if(robot.voltage.getVoltage() > 12.9){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.12;
+        } else if(robot.voltage.getVoltage() > 12.78){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.11;
+        } else if(robot.voltage.getVoltage() >= 12.65){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.10;
+        } else if(robot.voltage.getVoltage() < 12.65){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.09;
+        }
     }
 
     /*
