@@ -501,6 +501,65 @@ public class DriverControl extends OpMode {
             robot.armMotor.setPower(0.0);
         }
     }
+    public void strafe(double distance, double speed) {
+        int newLeftFrontTarget;
+        int newRightBackTarget;
+        int newRightFrontTarget;
+        int newLeftBackTarget;
+        double strafeScale =(10000.0/98.0) * (24.0/27.0) * (24.0/27.0);
+
+        wheelSetMode(1);
+
+        newLeftFrontTarget = robot.frontLeftDrive.getCurrentPosition() + (int) (distance * strafeScale);
+        newLeftBackTarget = robot.rearLeftDrive.getCurrentPosition() - (int) (distance * strafeScale);
+        newRightFrontTarget = robot.frontRightDrive.getCurrentPosition() - (int) (distance * strafeScale);
+        newRightBackTarget = robot.rearRightDrive.getCurrentPosition() + (int) (distance * strafeScale);
+
+        robot.frontLeftDrive.setTargetPosition(newLeftFrontTarget);
+        robot.rearLeftDrive.setTargetPosition(newLeftBackTarget);
+        robot.frontRightDrive.setTargetPosition(newRightFrontTarget);
+        robot.rearRightDrive.setTargetPosition(newRightBackTarget);
+
+        robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        robot.frontLeftDrive.setPower(Math.abs(speed));
+        robot.frontRightDrive.setPower(Math.abs(speed));
+        robot.rearLeftDrive.setPower(Math.abs(speed)); //-
+        robot.rearRightDrive.setPower(Math.abs(speed)); //-
+
+        while (robot.rearLeftDrive.isBusy() && robot.frontLeftDrive.isBusy() && robot.frontLeftDrive.isBusy() && robot.rearRightDrive.isBusy()){
+
+        }
+    }
+    public void wheelSetMode(int mode){
+        robot.rearLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        robot.rearRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        robot.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        robot.frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        if(mode == 1){
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        if(mode == 2){
+            robot.rearLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            robot.rearRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            robot.frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            robot.frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+
+
+    }
     /*
      * Code to run ONCE after the driver hits STOP
      */
@@ -519,4 +578,4 @@ public class DriverControl extends OpMode {
 
 
 
-}
+            }

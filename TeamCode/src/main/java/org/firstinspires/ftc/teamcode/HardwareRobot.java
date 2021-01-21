@@ -113,7 +113,7 @@ public class HardwareRobot
         frontRightDrive.setDirection(DcMotor.Direction.REVERSE);
         armMotor.setDirection(DcMotor.Direction.FORWARD);
         shootyMotor.setDirection(DcMotor.Direction.REVERSE);
-
+        shootyMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
