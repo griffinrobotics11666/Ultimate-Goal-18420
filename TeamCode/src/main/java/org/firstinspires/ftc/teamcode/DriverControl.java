@@ -104,6 +104,8 @@ public class DriverControl extends OpMode {
     private static final double SHOOTY_ROTATION_FLAT_POS     =  0.64;
     private static final double SHOOTY_ROTATION_LAUNCH_LOW     =  0.19;
     private static final double SHOOTY_ROTATION_LAUNCH_HIGH = 0.11;
+    private static double CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.13;
+
 
     private static final double CLAW_ROTATION_SERVO_PICKUP     =  0.35;
     private static final double CLAW_ROTATION_SERVO_DROP     =  0.49;
@@ -143,11 +145,15 @@ public class DriverControl extends OpMode {
 
         robot.shootyBoi.setPosition(SHOOTY_BOI_SERVO_LOAD_POS);
         robot.clawRotationServo.setPosition(0.68);
-        robot.clawServo.setPosition(0.22);
+        robot.clawServo.setPosition(0.35);
         robot.shootyRotation.setPosition(0.89);
+
+
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
+        telemetry.addData("Calculated launch pos", CALCULATED_SHOOTY_ROTATION_LAUNCH);
+
     }
 
 
@@ -164,6 +170,22 @@ public class DriverControl extends OpMode {
     @Override
     public void start() {
         runtime.reset();
+
+        if(robot.voltage.getVoltage() > 13.8){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.15;
+        } else if (robot.voltage.getVoltage() > 13.5){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.14;
+        } else if(robot.voltage.getVoltage() > 13.15){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.13;
+        } else if(robot.voltage.getVoltage() > 12.9){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.12;
+        } else if(robot.voltage.getVoltage() > 12.78){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.11;
+        } else if(robot.voltage.getVoltage() >= 12.65){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.10;
+        } else if(robot.voltage.getVoltage() < 12.65){
+            CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.09;
+        }
     }
 
     /*
@@ -221,7 +243,7 @@ public class DriverControl extends OpMode {
                 if (shootyRotationCount > 2) {
                     shootyRotationCount = 2;
                 }
-                robot.shootyRotation.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : SHOOTY_ROTATION_LAUNCH_HIGH);
+                robot.shootyRotation.setPosition(shootyRotationCount == 1 ? SHOOTY_ROTATION_LAUNCH_LOW : CALCULATED_SHOOTY_ROTATION_LAUNCH);
                 isUpChanged = true;
             } else if (!gamepad1.dpad_up) {
                 isUpChanged = false;

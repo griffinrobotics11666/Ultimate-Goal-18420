@@ -90,19 +90,6 @@ public class AdvancedAutonomous extends LinearOpMode {
         robot.clawServo.setPosition(0.22);
         robot.shootyRotation.setPosition(0.89);
 
-        if (robot.voltage.getVoltage() > 13.5){
-            SHOOTY_ROTATION_LAUNCH = 0.16;
-        } else if(robot.voltage.getVoltage() > 13.15){
-            SHOOTY_ROTATION_LAUNCH = 0.15;
-        } else if(robot.voltage.getVoltage() > 12.9){
-            SHOOTY_ROTATION_LAUNCH = 0.14;
-        } else if(robot.voltage.getVoltage() > 12.78){
-            SHOOTY_ROTATION_LAUNCH = 0.13;
-        } else if(robot.voltage.getVoltage() >= 12.65){
-            SHOOTY_ROTATION_LAUNCH = 0.12;
-        } else if(robot.voltage.getVoltage() < 12.65){
-            SHOOTY_ROTATION_LAUNCH = 0.14;
-        }
 
         telemetry.addData("Shooty Launch Rotation pos", SHOOTY_ROTATION_LAUNCH);
         telemetry.addData("voltage", robot.voltage.getVoltage());
@@ -110,6 +97,22 @@ public class AdvancedAutonomous extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+
+        if(robot.voltage.getVoltage() > 13.8){
+            SHOOTY_ROTATION_LAUNCH = 0.15;
+        } else if (robot.voltage.getVoltage() > 13.5){
+            SHOOTY_ROTATION_LAUNCH = 0.14;
+        } else if(robot.voltage.getVoltage() > 13.15){
+            SHOOTY_ROTATION_LAUNCH = 0.13;
+        } else if(robot.voltage.getVoltage() > 12.9){
+            SHOOTY_ROTATION_LAUNCH = 0.12;
+        } else if(robot.voltage.getVoltage() > 12.78){
+            SHOOTY_ROTATION_LAUNCH = 0.11;
+        } else if(robot.voltage.getVoltage() >= 12.65){
+            SHOOTY_ROTATION_LAUNCH = 0.10;
+        } else if(robot.voltage.getVoltage() < 12.65){
+            SHOOTY_ROTATION_LAUNCH = 0.09;
+        }
 
         //gyro stuff for turn()
         robot.imuControl.startAccelerationIntegration(new Position(), new Velocity(), 1000);
@@ -134,25 +137,26 @@ public class AdvancedAutonomous extends LinearOpMode {
             robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH);    //sets the shooting platform to the high angle
 
             turn(-3, TURN_SPEED);  //turns left (make positive if turns right) 10 degrees todo test this with different values to find the best one to hit the first target
-            sleep(3000); //small delay so things dont happen too quickly, adjust time and add/remove more if needed
+            sleep(5500); //small delay so things dont happen too quickly, adjust time and add/remove more if needed
 
             //SHOOT ONCE
             shoot();    //see method below
-            sleep(1000);
+            sleep(1500);
             robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH);
-            sleep(500);
+            sleep(1000);
 
 
             //SHOOT TWICE
             shoot();
-            sleep(1000);
+            sleep(1500);
             robot.shootyRotation.setPosition(SHOOTY_ROTATION_LAUNCH);
-            sleep(500);
+            sleep(1000);
 
             //SHOOT THRICE
             shoot();
             turn(3, TURN_SPEED);   //rotates the bot back to its original angle
-            sleep(1500);
+            sleep(2000);
+            sleep(2000);
 
             robot.clawRotationServo.setPosition(CLAW_ROTATION_SERVO_PICKUP);
 
