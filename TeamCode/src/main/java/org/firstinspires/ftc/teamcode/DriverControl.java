@@ -103,7 +103,7 @@ public class DriverControl extends OpMode {
 
     private static final double SHOOTY_ROTATION_FLAT_POS     =  0.64;
     private static final double SHOOTY_ROTATION_LAUNCH_LOW     =  0.19;
-    private static final double SHOOTY_ROTATION_LAUNCH_HIGH = 0.11;
+    private static final double SHOOTY_ROTATION_LAUNCH_HIGH = 0.13;
     private static double CALCULATED_SHOOTY_ROTATION_LAUNCH = 0.13;
 
 
